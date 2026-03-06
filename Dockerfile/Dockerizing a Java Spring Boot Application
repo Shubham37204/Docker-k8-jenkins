@@ -19,39 +19,6 @@ A JAR (Java Archive) contains:
 
 To run a Spring Boot application, we execute the JAR file.
 
-### ▶ Run Spring Boot Application
-
-```bash
-java -jar <jar-file-name>
-```
-
-Example:
-
-```bash
-java -jar app.jar
-```
-
----
-
-# 🌐 Embedded Tomcat Server
-
-Spring Boot comes with an **embedded Tomcat server**.
-
-This means:
-
-- No need to install **Tomcat separately**
-- The server starts automatically when the application runs
-- By default, the application runs on **port 8080**
-
-Example:
-
-```
-Application URL
-http://localhost:8080
-```
-
----
-
 # 🐳 Dockerfile for Spring Boot Application
 
 Below is a Dockerfile used to containerize a Spring Boot application.
