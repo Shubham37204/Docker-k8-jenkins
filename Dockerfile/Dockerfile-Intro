@@ -1,0 +1,342 @@
+# Dockerfile
+
+A **Dockerfile** contains a **set of instructions used to build a Docker Image**.
+
+It defines:
+
+- Base image
+- Dependencies
+- Application code
+- Commands to run the application
+
+Docker reads these instructions **line by line** and builds the image.
+
+**Filename must be:**
+
+```
+Dockerfile
+```
+
+---
+
+# Common Dockerfile Instructions
+
+The following keywords are commonly used in a Dockerfile:
+
+1. `FROM`
+2. `MAINTAINER`
+3. `RUN`
+4. `CMD`
+5. `COPY`
+6. `ADD`
+7. `WORKDIR`
+8. `EXPOSE`
+9. `ENTRYPOINT`
+10. `USER`
+
+---
+
+# FROM
+
+`FROM` is used to specify the **base image** for the application.
+
+Every Dockerfile **must start with a FROM instruction**.
+
+Example:
+
+```dockerfile
+FROM openjdk:17
+FROM python:3.9
+FROM node:19
+FROM mysql:8
+FROM tomcat:9
+```
+
+The base image provides the **initial environment required for the application**.
+
+---
+
+# MAINTAINER
+
+`MAINTAINER` specifies **who created the Dockerfile**.
+
+Example:
+
+```dockerfile
+MAINTAINER Ashok <ashok.b@oracle.com>
+```
+
+> Note: In modern Docker versions, `LABEL` is preferred instead of `MAINTAINER`.
+
+Example:
+
+```dockerfile
+LABEL maintainer="ashok.b@oracle.com"
+```
+
+---
+
+# RUN
+
+`RUN` is used to execute commands **while building the Docker image**.
+
+These commands run **during image creation**.
+
+Example:
+
+```dockerfile
+RUN git clone https://github.com/sample/project.git
+RUN mvn clean package
+```
+
+Multiple `RUN` instructions can be written in a Dockerfile and they execute **in order**.
+
+Example:
+
+```dockerfile
+RUN echo "step 1"
+RUN echo "step 2"
+```
+
+---
+
+# CMD
+
+`CMD` specifies the **default command that runs when a container starts**.
+
+Example:
+
+```dockerfile
+CMD java -jar app.jar
+```
+
+Example:
+
+```dockerfile
+CMD python app.py
+```
+
+Important rule:
+
+- You can write **multiple CMD instructions**
+- But **Docker only executes the last CMD**
+
+Example:
+
+```dockerfile
+CMD echo "first command"
+CMD echo "second command"
+```
+
+Output:
+
+```
+second command
+```
+
+---
+
+# ENTRYPOINT
+
+`ENTRYPOINT` defines the **main command that always runs when the container starts**.
+
+Example:
+
+```dockerfile
+ENTRYPOINT ["java", "-jar", "app.jar"]
+```
+
+Example:
+
+```dockerfile
+ENTRYPOINT ["python", "app.py"]
+```
+
+### CMD vs ENTRYPOINT
+
+| Feature | CMD | ENTRYPOINT |
+|------|------|------|
+| Can be overridden | Yes | No |
+| Default command | Yes | Yes |
+| Used for fixed execution | No | Yes |
+
+---
+
+# COPY
+
+`COPY` copies files **from host machine to container filesystem**.
+
+Example:
+
+```dockerfile
+COPY target/app.jar /usr/app/app.jar
+```
+
+Example:
+
+```dockerfile
+COPY app.py /usr/app/app.py
+```
+
+Example for Tomcat deployment:
+
+```dockerfile
+COPY target/app.war /usr/local/tomcat/webapps/app.war
+```
+
+---
+
+# ADD
+
+`ADD` is similar to `COPY`, but it has **additional capabilities**.
+
+Example:
+
+```dockerfile
+ADD target/app.jar /usr/app/app.jar
+```
+
+It can also **download files from a URL**.
+
+Example:
+
+```dockerfile
+ADD https://example.com/app.jar /usr/app/app.jar
+```
+
+However, in most cases **COPY is preferred**.
+
+---
+
+# WORKDIR
+
+`WORKDIR` sets the **working directory inside the container**.
+
+Example:
+
+```dockerfile
+WORKDIR /usr/app
+```
+
+All commands after this will execute **inside this directory**.
+
+Example:
+
+```dockerfile
+WORKDIR /usr/app
+COPY target/app.jar app.jar
+CMD java -jar app.jar
+```
+
+---
+
+# USER
+
+`USER` specifies the **user that will execute commands inside the container**.
+
+Example:
+
+```dockerfile
+USER root
+```
+
+Example:
+
+```dockerfile
+USER appuser
+```
+
+This improves **security by avoiding root execution**.
+
+---
+
+# EXPOSE
+
+`EXPOSE` specifies the **port on which the application runs inside the container**.
+
+Example:
+
+```dockerfile
+EXPOSE 8080
+```
+
+Important:
+
+- `EXPOSE` only **documents the port**
+- It **does not publish the port**
+
+Port mapping is done using `docker run -p`.
+
+Example:
+
+```bash
+docker run -p 8080:8080 myapp
+```
+
+---
+
+# Sample Dockerfile
+
+Example Dockerfile:
+
+```dockerfile
+FROM ubuntu
+
+MAINTAINER Ashok <ashok.b@oracle.com>
+
+RUN echo "hello from run instruction-1"
+RUN echo "hello from run instruction-2"
+
+CMD echo "hi from cmd-1"
+CMD echo "hi from cmd-2"
+```
+
+Note:
+
+Only the **last CMD instruction will execute**.
+
+---
+
+# Build Docker Image
+
+To build a Docker image from the Dockerfile:
+
+```bash
+docker build -t img-1 .
+```
+
+Explanation:
+
+- `docker build` → builds the image
+- `-t` → assigns a tag (name) to the image
+- `.` → current directory contains the Dockerfile
+
+---
+
+# Run Docker Container
+
+Run the image to create a container:
+
+```bash
+docker run img-1
+```
+
+Docker will create a container and execute the **CMD instruction**.
+
+---
+
+# Dockerfile Workflow
+
+```
+Dockerfile
+     ↓
+Docker Build
+     ↓
+Docker Image
+     ↓
+Docker Run
+     ↓
+Docker Container
+```
+
+The container will then run the **application defined in CMD or ENTRYPOINT**.
