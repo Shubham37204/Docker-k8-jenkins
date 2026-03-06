@@ -1,0 +1,326 @@
+# 🚀 Dockerizing a Java Spring Boot Application
+
+Dockerizing a **Spring Boot application** means packaging the application and its runtime environment into a **Docker container** so it can run consistently across different machines.
+
+This approach ensures that the application behaves the **same in development, testing, and production environments**.
+
+---
+
+# 📦 Spring Boot Application Packaging
+
+Every **Spring Boot application** is packaged as a **JAR file**.
+
+A JAR (Java Archive) contains:
+
+- Application source code
+- Compiled classes
+- Required libraries
+- Embedded server (Tomcat)
+
+To run a Spring Boot application, we execute the JAR file.
+
+### ▶ Run Spring Boot Application
+
+```bash
+java -jar <jar-file-name>
+```
+
+Example:
+
+```bash
+java -jar app.jar
+```
+
+---
+
+# 🌐 Embedded Tomcat Server
+
+Spring Boot comes with an **embedded Tomcat server**.
+
+This means:
+
+- No need to install **Tomcat separately**
+- The server starts automatically when the application runs
+- By default, the application runs on **port 8080**
+
+Example:
+
+```
+Application URL
+http://localhost:8080
+```
+
+---
+
+# 🐳 Dockerfile for Spring Boot Application
+
+Below is a Dockerfile used to containerize a Spring Boot application.
+
+```dockerfile
+FROM openjdk:17
+
+MAINTAINER Ashok
+
+COPY target/app.jar /usr/app/
+
+WORKDIR /usr/app/
+
+EXPOSE 8080
+
+ENTRYPOINT ["java", "-jar", "app.jar"]
+```
+
+---
+
+# 🔎 Understanding the Dockerfile
+
+### 1️⃣ Base Image
+
+```dockerfile
+FROM openjdk:17
+```
+
+- Uses **OpenJDK 17** as the base image
+- Provides the **Java runtime environment** needed to run the application
+
+---
+
+### 2️⃣ Maintainer Information
+
+```dockerfile
+MAINTAINER Ashok
+```
+
+- Specifies the **author of the Dockerfile**
+
+---
+
+### 3️⃣ Copy Application JAR
+
+```dockerfile
+COPY target/app.jar /usr/app/
+```
+
+- Copies the generated **Spring Boot JAR file**
+- From the host machine to the container
+
+Source:
+
+```
+target/app.jar
+```
+
+Destination inside container:
+
+```
+/usr/app/
+```
+
+---
+
+### 4️⃣ Set Working Directory
+
+```dockerfile
+WORKDIR /usr/app/
+```
+
+- Sets `/usr/app` as the **working directory**
+- All commands will run inside this directory
+
+---
+
+### 5️⃣ Expose Application Port
+
+```dockerfile
+EXPOSE 8080
+```
+
+- Indicates that the application runs on **port 8080**
+- This is only **documentation for Docker**
+
+---
+
+### 6️⃣ Run the Application
+
+```dockerfile
+ENTRYPOINT ["java", "-jar", "app.jar"]
+```
+
+- Runs the Spring Boot application
+- Executes the command when the container starts
+
+Equivalent command:
+
+```bash
+java -jar app.jar
+```
+
+---
+
+# 📂 Spring Boot Docker Example Repository
+
+Example repository used for demonstration:
+
+```
+https://github.com/ashokitschool/spring-boot-docker-app.git
+```
+
+---
+
+# 📥 Step 1 — Clone the Repository
+
+```bash
+git clone https://github.com/ashokitschool/spring-boot-docker-app.git
+```
+
+---
+
+# 📁 Step 2 — Navigate to Project Directory
+
+```bash
+cd spring-boot-docker-app
+```
+
+---
+
+# ⚙ Step 3 — Build the Application
+
+Compile the project and generate the JAR file.
+
+```bash
+mvn clean package
+```
+
+After successful build, the JAR file will be created in:
+
+```
+target/
+```
+
+Check the generated file:
+
+```bash
+ls -l target
+```
+
+Example output:
+
+```
+app.jar
+```
+
+---
+
+# 🏗 Step 4 — Build Docker Image
+
+Build a Docker image using the Dockerfile.
+
+```bash
+docker build -t sb-app .
+```
+
+Explanation:
+
+| Option | Meaning |
+|------|------|
+| docker build | Creates a Docker image |
+| -t sb-app | Image name (tag) |
+| . | Current directory contains Dockerfile |
+
+---
+
+# ▶ Step 5 — Run Docker Container
+
+Run the container from the image.
+
+```bash
+docker run -d -p 8080:8080 sb-app
+```
+
+Explanation:
+
+| Option | Meaning |
+|------|------|
+| -d | Run container in background |
+| -p 8080:8080 | Port mapping |
+| sb-app | Image name |
+
+### Port Mapping
+
+```
+Host Machine Port → Container Port
+8080 → 8080
+```
+
+---
+
+# 📜 Check Container Logs
+
+After the container starts, check the logs.
+
+```bash
+docker logs <container-id>
+```
+
+Example:
+
+```bash
+docker logs 7f4a8b2d1c3e
+```
+
+Logs will show the **Spring Boot startup process**.
+
+---
+
+# 🌍 Access the Application
+
+Once the container is running, access the application using:
+
+```
+http://localhost:8080
+```
+
+If running on a cloud VM:
+
+```
+http://<vm-public-ip>:8080
+```
+
+Example:
+
+```
+http://54.210.100.25:8080
+```
+
+---
+
+# 🔄 Complete Workflow
+
+```
+Spring Boot Application
+        ↓
+mvn clean package
+        ↓
+app.jar generated
+        ↓
+Dockerfile
+        ↓
+docker build
+        ↓
+Docker Image
+        ↓
+docker run
+        ↓
+Docker Container
+        ↓
+Application running on port 8080
+```
+
+---
+
+# ✅ Benefits of Dockerizing Spring Boot
+
+✔ Consistent environment across machines  
+✔ No need to install Java manually  
+✔ Easy deployment to servers or cloud  
+✔ Portable and scalable application deployment
