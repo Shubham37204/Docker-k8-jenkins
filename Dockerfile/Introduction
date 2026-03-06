@@ -1,0 +1,182 @@
+1️⃣ Application Architecture
+Application Architecture describes how different parts of an application are structured and how they communicate with each other.
+A typical web application architecture usually contains three main components:
+
+1. Frontend (User Interface – UI)
+The Frontend is the visual part of the application that users interact with.
+It runs inside the web browser.
+Displays buttons, forms, dashboards, and pages.
+Sends user requests to the backend.
+Example technologies: Angular, React, Vue
+👉 Example: When a user clicks “Login”, the request is sent from the frontend to the backend.
+
+2. Backend (Business Logic Layer)
+The Backend is responsible for processing requests and implementing business logic.
+Responsibilities include:
+Handling API requests
+Processing user input
+Applying business rules
+Communicating with the database
+Example technologies: Java, Node.js, Python
+
+3. Database (Data Storage Layer)
+The Database stores all the application data.
+Examples of stored data:
+User accounts
+Transactions
+Application logs
+Product information
+Example technologies: MySQL, PostgreSQL, MongoDB
+Application Request Flow
+The communication flow in a typical web application is:
+User → Frontend → Backend → Database
+Example flow:
+User submits a login form
+Frontend sends request to Backend API
+Backend checks user credentials in the Database
+Database returns result
+Backend sends response to Frontend
+Frontend shows Login Success / Failure
+
+2️⃣ Tech Stack of an Application
+A Tech Stack refers to the collection of technologies used to build and run an application.
+It includes technologies for:
+Frontend development
+Backend processing
+Database storage
+Application servers
+
+Example Tech Stack
+Layer	Technology	Purpose
+Frontend	Angular 16	Builds the user interface
+Backend	Java 17	Handles business logic & APIs
+Database	MySQL Server 8.5	Stores application data
+Web Server	Tomcat 9.0	Runs the Java application
+What is a Dependency?
+
+A Dependency is any software required for the application to run properly.
+Example dependencies for this application:
+Java Runtime
+Angular Framework
+MySQL Database
+Tomcat Server
+To run the application without Docker, every machine must install these dependencies manually.
+
+3️⃣ Application Environments
+In real-world software development, applications are not deployed directly to production.
+Instead, they pass through multiple environments for testing, validation, and quality assurance.
+Each environment serves a specific purpose.
+
+1️⃣ DEV (Development Environment)
+The Development Environment is used by developers.
+Purpose:
+Writing code
+Building new features
+Fixing bugs
+Integrating modules
+This environment may be unstable because developers frequently change code.
+
+2️⃣ SIT (System Integration Testing)
+The System Integration Testing (SIT) environment is used to test whether all modules of the system work together correctly.
+Focus areas:
+API communication
+Database connectivity
+Integration between services
+Example:
+Frontend calling Backend APIs.
+
+3️⃣ UAT (User Acceptance Testing)
+The User Acceptance Testing (UAT) environment is used by the client or business stakeholders.
+Purpose:
+Verify that the system meets business requirements
+Validate real-world scenarios
+At the end of UAT, the client decides:
+Go / No Go
+Meaning:
+Go → Deploy to production
+No Go → Fix issues
+
+4️⃣ PILOT Environment
+The Pilot Environment is a pre-production testing stage.
+Characteristics:
+Application is tested with limited real users
+Helps detect issues before full production launch
+Example:
+A new feature is released to 10% of users first.
+
+5️⃣ PROD (Production Environment)
+The Production Environment is the live system where real users access the application.
+Characteristics:
+High stability
+High security
+High availability
+Any failure in production can affect real customers.
+
+4️⃣ Why We Need Docker Even When We Already Have Application Architecture
+Even if we have a well-designed application architecture and a defined tech stack, running the application across multiple machines can still be difficult.
+Why?
+Because the application depends on many software dependencies.
+Example dependencies:
+Java
+Angular
+MySQL
+Tomcat
+
+Specific library versions
+Every environment must install these dependencies correctly.
+
+Problems Without Docker
+1️⃣ Dependency Installation Errors
+Manual installation in every environment can cause mistakes.
+Example:
+A developer forgets to install a required library.
+Result → Application fails to run.
+
+2️⃣ Version Compatibility Issues
+Different machines may use different software versions.
+Example:
+DEV machine → Java 17
+Server → Java 11
+Result → Application may crash or behave unexpectedly.
+
+3️⃣ Environment Differences
+An application may run perfectly on the developer's laptop but fail on the server.
+This is known as the famous problem:
+
+“It Works on My Machine”
+5️⃣ How Docker Solves This Problem
+Docker solves these problems by packaging the application and its dependencies together into a container.
+A Docker Container includes:
+Application Code
+Runtime Environment (Java)
+Required Libraries
+Configuration Files
+Benefits of Docker
+
+1️⃣ Consistent Environment
+The application runs exactly the same on every machine.
+DEV = SIT = UAT = PROD
+
+2️⃣ No Manual Dependency Installation
+We don't need to install:
+Java
+Angular
+MySQL
+Tomcat
+Everything is already inside the container.
+
+3️⃣ Faster Deployment
+Instead of installing many tools, we simply run:
+Docker Container → Application starts immediately
+Without Docker
+Every machine must install:
+Java
+Angular
+MySQL
+Tomcat
+Manual setup = Time consuming + Error prone
+
+With Docker
+We just run:
+Docker Container
+Everything required is already packaged inside it.
