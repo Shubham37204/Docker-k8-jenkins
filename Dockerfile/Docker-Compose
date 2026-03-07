@@ -1,0 +1,381 @@
+# Docker Compose
+
+## Monolithic Architecture
+
+Earlier, applications were developed using **Monolithic Architecture**.
+
+In this architecture, **everything exists in a single application**.
+
+Example:
+
+```
+Single Application
+ ├── UI
+ ├── Business Logic
+ └── Database Access
+```
+
+All components are tightly coupled.
+
+---
+
+# Microservices Architecture
+
+Nowadays applications are developed using **Microservices Architecture**.
+
+In this architecture, applications are split into **multiple independent services (APIs)**.
+
+Example:
+
+```
+hotels-api
+flights-api
+trains-api
+cabs-api
+```
+
+Each service performs a **specific task**.
+
+---
+
+# Containers for Microservices
+
+Since every microservice is an **independent application**, each service usually runs inside its **own container**.
+
+Example architecture:
+
+```
+Container 1 → hotels-api
+Container 2 → flights-api
+Container 3 → trains-api
+Container 4 → cabs-api
+```
+
+---
+
+# Problem with Multiple Containers
+
+When we run multiple containers:
+
+```
+create container
+start container
+stop container
+restart container
+manage networking
+manage volumes
+```
+
+Managing them individually becomes **very difficult**.
+
+---
+
+# Solution → Docker Compose
+
+To solve this problem we use **Docker Compose**.
+
+Docker Compose is used to manage **Multi-Container Applications**.
+
+With Docker Compose we can:
+
+```
+Create multiple containers
+Start multiple containers
+Stop multiple containers
+Remove multiple containers
+```
+
+using a **single command**.
+
+---
+
+# What is `docker-compose.yml` ?
+
+`docker-compose.yml` is a **configuration file** used to define multiple containers and their settings.
+
+The default file name is:
+
+```
+docker-compose.yml
+```
+
+(We can change it, but this is the standard name.)
+
+---
+
+# Sections in docker-compose.yml
+
+A typical `docker-compose.yml` file contains **four main sections**.
+
+```
+version
+services
+networks
+volumes
+```
+
+---
+
+## 1. version
+
+Defines the **version of Docker Compose file format**.
+
+Example:
+
+```yaml
+version: "3"
+```
+
+---
+
+## 2. services
+
+Defines **containers information** such as:
+
+```
+image name
+port mapping
+environment variables
+dependencies
+volumes
+```
+
+Example:
+
+```yaml
+services:
+  application:
+    image: spring-boot-mysql-app
+```
+
+---
+
+## 3. networks
+
+Defines the **Docker network used by containers**.
+
+Example:
+
+```yaml
+networks:
+  springboot-db-net:
+```
+
+---
+
+## 4. volumes
+
+Defines **persistent storage for containers**.
+
+Example:
+
+```yaml
+volumes:
+  - /data/mysql
+```
+
+---
+
+# Docker Compose Setup
+
+## Install Docker Compose
+
+```bash
+sudo curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+```
+
+Give execution permission:
+
+```bash
+sudo chmod +x /usr/local/bin/docker-compose
+```
+
+---
+
+## Verify Installation
+
+```bash
+docker-compose --version
+```
+
+Example output:
+
+```
+docker-compose version 1.24.0
+```
+
+---
+
+# Spring Boot + MySQL using Docker Compose
+
+Example `docker-compose.yml`
+
+```yaml
+version: "3"
+
+services:
+
+  application:
+    image: spring-boot-mysql-app
+    ports:
+      - "8080:8080"
+    networks:
+      - springboot-db-net
+    depends_on:
+      - mysqldb
+    volumes:
+      - /data/springboot-app
+
+  mysqldb:
+    image: mysql:5.7
+    networks:
+      - springboot-db-net
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=sbms
+    volumes:
+      - /data/mysql
+
+networks:
+  springboot-db-net:
+```
+
+---
+
+# Explanation
+
+### application service
+
+```
+image → docker image for spring boot application
+ports → port mapping
+networks → network used by container
+depends_on → container dependency
+volumes → container storage
+```
+
+### mysqldb service
+
+```
+mysql:5.7 → mysql docker image
+environment → mysql configuration variables
+volumes → persistent mysql storage
+```
+
+---
+
+# Application Execution Process
+
+## Clone Git Repository
+
+```bash
+git clone https://github.com/ashokitschool/spring-boot-mysql-docker-compose.git
+```
+
+---
+
+## Move into Project Directory
+
+```bash
+cd spring-boot-mysql-docker-compose
+```
+
+---
+
+## Build Project using Maven
+
+```bash
+mvn clean package
+```
+
+---
+
+## Build Docker Image
+
+```bash
+docker build -t spring-boot-mysql-app .
+```
+
+---
+
+## Check Docker Images
+
+```bash
+docker images
+```
+
+---
+
+# Docker Compose Commands
+
+## Create Containers
+
+```bash
+docker-compose up -d
+```
+
+Explanation:
+
+```
+up → create and start containers
+-d → run containers in detached mode
+```
+
+---
+
+## Check Running Containers
+
+```bash
+docker-compose ps
+```
+
+---
+
+## Stop Containers
+
+```bash
+docker-compose stop
+```
+
+---
+
+## Start Containers
+
+```bash
+docker-compose start
+```
+
+---
+
+## Remove Containers
+
+```bash
+docker-compose down
+```
+
+This command will:
+
+```
+Stop containers
+Remove containers
+Remove networks
+```
+
+---
+
+# Key Points
+
+```
+Docker Compose is used to manage multi-container applications.
+
+docker-compose.yml file defines container configuration.
+
+Using Docker Compose we can manage multiple containers using a single command.
+
+Main sections of docker-compose.yml:
+
+version
+services
+networks
+volumes
+```
