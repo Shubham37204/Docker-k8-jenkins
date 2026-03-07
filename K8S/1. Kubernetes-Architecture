@@ -1,0 +1,389 @@
+# Kubernetes Architecture
+
+## Kubernetes Cluster Architecture
+
+Kubernetes follows a **cluster architecture**.
+
+A **cluster** means a **group of servers (machines) working together**.
+
+In a Kubernetes cluster there are two main types of nodes:
+
+```
+1. Control Plane (Master Node)
+2. Worker Nodes
+```
+
+The **control plane manages the cluster**, while **worker nodes run the applications**.
+
+---
+
+# Kubernetes Cluster Structure
+
+```
+Kubernetes Cluster
+        |
+        |
+  ----------------------
+  |                    |
+Control Plane      Worker Nodes
+(Master Node)      (Application Nodes)
+```
+
+The **Control Plane** manages the cluster and schedules workloads.
+
+The **Worker Nodes** run the actual application containers.
+
+---
+
+# Kubernetes Cluster Components
+
+## 1 Control Plane (Master Node)
+
+The **Control Plane** is responsible for managing the Kubernetes cluster.
+
+It contains the following components:
+
+```
+API Server
+Scheduler
+Controller Manager
+ETCD
+```
+
+### API Server
+
+The **API Server** is the **entry point of the Kubernetes cluster**.
+
+All communication with the Kubernetes cluster happens through the API Server.
+
+When a user or developer sends a request using **kubectl**, the request goes to the API Server.
+
+Example:
+
+```
+kubectl create deployment my-app
+```
+
+The API Server receives the request and processes it.
+
+---
+
+### ETCD
+
+**ETCD** is the **internal database of Kubernetes**.
+
+It stores all cluster information such as:
+
+```
+Cluster configuration
+Application deployments
+Service details
+Node information
+Pod status
+```
+
+When a request is received by the API Server, the request information is stored in **ETCD with a pending status**.
+
+---
+
+### Scheduler
+
+The **Scheduler** is responsible for assigning workloads to worker nodes.
+
+It checks for **pending tasks in ETCD** and decides **which worker node should run the task**.
+
+Example:
+
+```
+New Pod Request
+        ↓
+Scheduler identifies a suitable worker node
+        ↓
+Pod is scheduled on that worker node
+```
+
+The scheduler selects nodes based on:
+
+```
+CPU availability
+Memory availability
+Node health
+Resource requirements
+```
+
+---
+
+### Controller Manager
+
+The **Controller Manager** ensures that the cluster is running in the **desired state**.
+
+It continuously checks whether the system is working as expected.
+
+Example:
+
+If Kubernetes expects **3 pods running** but only **2 are running**, the Controller Manager will create a **new pod automatically**.
+
+Responsibilities include:
+
+```
+Monitoring cluster state
+Ensuring desired number of pods
+Handling node failures
+Maintaining system stability
+```
+
+---
+
+# Worker Node Components
+
+Worker nodes are responsible for **running the actual applications**.
+
+Each worker node contains the following components:
+
+```
+Kubelet
+Kube Proxy
+Container Runtime
+Pods
+Containers
+```
+
+---
+
+## Kubelet
+
+**Kubelet** is called the **Node Agent**.
+
+It runs on every worker node and communicates with the Control Plane.
+
+Responsibilities of Kubelet:
+
+```
+Receive instructions from control plane
+Create pods on the worker node
+Monitor containers
+Report node status back to control plane
+```
+
+The Scheduler identifies worker nodes using **Kubelet information**.
+
+---
+
+## Kube Proxy
+
+**Kube Proxy** is responsible for **network communication inside the Kubernetes cluster**.
+
+It ensures communication between:
+
+```
+Pods
+Nodes
+Services
+```
+
+It manages networking rules and ensures traffic is routed correctly.
+
+---
+
+## Container Runtime
+
+The **Container Runtime** is responsible for running containers.
+
+Common container runtimes include:
+
+```
+Docker
+Containerd
+CRI-O
+```
+
+In many setups, **Docker Engine** is used to run containers inside Kubernetes.
+
+---
+
+## Pods
+
+In Kubernetes, containers are not created directly.
+
+Containers are created inside a **Pod**.
+
+A **Pod** is the **smallest deployable unit in Kubernetes**.
+
+Example:
+
+```
+Pod
+ ├── Container 1
+ └── Container 2
+```
+
+A pod may contain **one or more containers**.
+
+Pods share:
+
+```
+Network
+Storage
+IP Address
+```
+
+Important Note:
+
+```
+In Kubernetes everything is represented as a POD.
+```
+
+Applications are always deployed inside pods.
+
+---
+
+# Kubernetes Cluster Communication Flow
+
+The request flow inside Kubernetes works like this:
+
+```
+Developer
+   |
+   v
+kubectl CLI
+   |
+   v
+API Server
+   |
+   v
+ETCD (stores request)
+   |
+   v
+Scheduler
+   |
+   v
+Worker Node (via Kubelet)
+   |
+   v
+Pod Created
+   |
+   v
+Container Running
+```
+
+---
+
+# Kubernetes Cluster Setup Options
+
+There are multiple ways to set up a Kubernetes cluster.
+
+## 1 Minikube
+
+Minikube is used for **local practice and learning**.
+
+Characteristics:
+
+```
+Single node cluster
+Runs on local machine
+Used for development and testing
+```
+
+Example usage:
+
+```
+minikube start
+```
+
+---
+
+## 2 Kubeadm Cluster
+
+Kubeadm is used to create a **self-managed Kubernetes cluster**.
+
+In this setup, the user is responsible for:
+
+```
+Cluster installation
+Node configuration
+Networking
+Security
+Maintenance
+```
+
+This approach gives **full control over the cluster**.
+
+---
+
+## 3 Provider Managed Cluster
+
+Cloud providers offer **managed Kubernetes services**.
+
+In this setup, the cloud provider manages the control plane and infrastructure.
+
+Examples:
+
+```
+AWS EKS (Elastic Kubernetes Service)
+Azure AKS (Azure Kubernetes Service)
+GCP GKE (Google Kubernetes Engine)
+```
+
+Benefits:
+
+```
+Easy setup
+Automatic upgrades
+High availability
+Managed infrastructure
+```
+
+Note:
+
+```
+Managed Kubernetes services are chargeable.
+```
+
+---
+
+# Summary
+
+Kubernetes uses a **cluster architecture** to manage containerized applications.
+
+```
+Kubernetes Cluster
+     |
+     |
+ ---------------------
+ |                   |
+Control Plane      Worker Nodes
+```
+
+Control Plane responsibilities:
+
+```
+API Server
+Scheduler
+Controller Manager
+ETCD
+```
+
+Worker Node responsibilities:
+
+```
+Kubelet
+Kube Proxy
+Container Runtime
+Pods
+Containers
+```
+
+Workflow summary:
+
+```
+kubectl → API Server → ETCD → Scheduler → Worker Node → Pod → Container
+```
+
+This architecture allows Kubernetes to provide:
+
+```
+Scalability
+High Availability
+Self Healing
+Automated Container Management
+```
