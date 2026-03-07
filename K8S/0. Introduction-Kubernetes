@@ -1,0 +1,379 @@
+## What is Kubernetes?
+
+Kubernetes (K8S) is a **free and open-source container orchestration platform** used to manage containerized applications.
+
+It was originally developed by **Google** and is written using the **Go programming language**.
+
+Kubernetes helps in managing containers automatically by performing operations such as:
+
+```
+Create Containers
+Start Containers
+Stop Containers
+Delete Containers
+Scale Containers
+Restart Failed Containers
+```
+
+Instead of manually managing containers, Kubernetes automates these operations.
+
+---
+
+# Containerization
+
+Containerization means **packaging an application and all its dependencies together into a single unit called a container**.
+
+Dependencies may include:
+
+- Libraries
+- Runtime
+- Frameworks
+- Configuration files
+- Environment variables
+
+Example structure:
+
+```
+Application Code
+Libraries
+Dependencies
+Runtime
+Configuration
+```
+
+All these components are bundled into a **container image**.
+
+When the image runs, it becomes a **container**.
+
+This ensures the application runs the same in every environment.
+
+Example workflow:
+
+```
+Developer Machine
+        ↓
+Docker Container
+        ↓
+Testing Server
+        ↓
+Production Server
+```
+
+---
+
+# What is Orchestration?
+
+When applications scale, they run multiple containers.
+
+Example:
+
+```
+Container1
+Container2
+Container3
+Container4
+Container5
+```
+
+Managing these containers manually is difficult.
+
+Tasks include:
+
+```
+Start containers
+Stop containers
+Restart failed containers
+Scale containers
+Monitor containers
+Distribute traffic
+```
+
+Automating these tasks is called **Orchestration**.
+
+Kubernetes performs container orchestration.
+
+---
+
+# Advantages of Kubernetes
+
+## 1 Auto Scaling
+
+Auto scaling means **automatically increasing or decreasing the number of containers depending on traffic demand**.
+
+Example:
+
+```
+Normal Traffic
+--------------
+3 Containers Running
+
+High Traffic
+------------
+10 Containers Running
+
+Low Traffic
+-----------
+2 Containers Running
+```
+
+Benefits:
+
+- Handles sudden traffic spikes
+- Efficient resource usage
+- Better performance
+
+---
+
+## 2 Load Balancing
+
+Load balancing distributes incoming user requests across multiple containers.
+
+Without load balancing:
+
+```
+User Requests → Container1
+```
+
+This causes the container to become overloaded.
+
+With Kubernetes load balancing:
+
+```
+User Requests
+      |
+      v
+Load Balancer
+   /   |   \
+ C1   C2   C3
+```
+
+Each container handles part of the traffic.
+
+Benefits:
+
+- Prevents overload
+- Faster response
+- Better stability
+
+---
+
+## 3 Self Healing
+
+Self-healing means Kubernetes **automatically replaces failed containers**.
+
+Example:
+
+Initial state:
+
+```
+Container1
+Container2
+Container3
+```
+
+If Container2 crashes:
+
+```
+Container1
+Container2 (Crashed)
+Container3
+```
+
+Kubernetes detects the failure and creates a new container automatically.
+
+Recovered state:
+
+```
+Container1
+Container2 (New Container)
+Container3
+```
+
+Benefits:
+
+- High availability
+- Automatic recovery
+- Reduced downtime
+
+---
+
+# Docker vs Kubernetes
+
+| Feature | Docker | Kubernetes |
+|------|------|------|
+| Platform Type | Containerization Platform | Container Orchestration Platform |
+| Purpose | Create and run containers | Manage containers |
+| Scaling | Manual | Automatic |
+| Load Balancing | Limited | Built-in |
+| Self Healing | Not Available | Available |
+
+---
+
+# Docker
+
+Docker is used for **creating containers**.
+
+It packages applications into **Docker images**.
+
+Example workflow:
+
+```
+Application Code
+      |
+      v
+Dockerfile
+      |
+      v
+Docker Image
+      |
+      v
+Docker Container
+```
+
+A **container** is simply a **running instance of a Docker image**.
+
+Docker ensures applications run consistently across environments.
+
+---
+
+# Kubernetes
+
+Kubernetes is responsible for **managing containers across servers**.
+
+Kubernetes performs tasks such as:
+
+```
+Deploy Containers
+Scale Containers
+Restart Failed Containers
+Distribute Traffic
+Monitor Application Health
+```
+
+Example structure:
+
+```
+Users
+  |
+  v
+Load Balancer
+  |
+  v
+Kubernetes Cluster
+  |
+  |---- Container1
+  |---- Container2
+  |---- Container3
+  |---- Container4
+```
+
+Kubernetes ensures containers are always **running and available**.
+
+---
+
+# Simple Real World Analogy
+
+Think of a **restaurant system**.
+
+## Docker
+
+Docker is like **packing food into boxes**.
+
+```
+Food + Ingredients + Packaging
+          ↓
+        Food Box
+```
+
+Each food box represents a **container**.
+
+---
+
+## Kubernetes
+
+Kubernetes is like the **restaurant manager**.
+
+Manager responsibilities:
+
+```
+Assign work to cooks
+Add more cooks when customers increase
+Replace cooks if someone leaves
+Distribute orders properly
+```
+
+Therefore:
+
+```
+Docker → Creates containers
+Kubernetes → Manages containers
+```
+
+---
+
+# Basic Deployment Workflow
+
+Typical deployment process:
+
+```
+Step 1
+Developer writes application code
+
+Step 2
+Application is packaged into Docker Image
+
+Step 3
+Docker Image is pushed to Docker Registry
+
+Step 4
+Kubernetes pulls the image
+
+Step 5
+Kubernetes creates and manages containers
+```
+
+Architecture representation:
+
+```
+Developer
+   |
+   v
+Docker Image
+   |
+   v
+Docker Registry
+   |
+   v
+Kubernetes Cluster
+   |
+   |---- Container1
+   |---- Container2
+   |---- Container3
+```
+
+---
+
+# Summary
+
+Docker and Kubernetes work together in modern cloud applications.
+
+```
+Docker
+  ↓
+Creates Containers
+```
+
+```
+Kubernetes
+  ↓
+Manages Containers
+Scales Containers
+Restarts Failed Containers
+Balances Traffic
+```
+
+Therefore:
+
+```
+Docker + Kubernetes = Modern Cloud Application Deployment
+```
