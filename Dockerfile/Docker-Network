@@ -1,0 +1,292 @@
+# Docker Network
+
+## What is Network?
+
+- **Network is all about communication**
+- Docker containers often need to communicate with:
+  - Other containers
+  - Host machine
+  - External services
+
+Docker provides networking so containers can communicate safely.
+
+---
+
+# What is Docker Network?
+
+A **Docker Network** provides an **isolated network for containers**.
+
+If two containers run under the **same Docker network**, they can communicate with each other.
+
+Example:
+
+```
+Container A  ---->  Container B
+      (same docker network)
+```
+
+---
+
+# Default Docker Networks
+
+Docker provides **3 default networks**.
+
+```
+1) bridge
+2) host
+3) none
+```
+
+---
+
+# 1) Bridge Network
+
+Bridge network is the **default network for Docker containers**.
+
+### Characteristics
+
+- Used to run **standalone containers**
+- Docker assigns **one internal IP address** to each container
+- Containers in the same bridge network can communicate with each other
+
+### Example
+
+```bash
+docker run -d -p 8080:8080 sb-app-image
+```
+
+Docker automatically connects the container to the **bridge network**.
+
+### Architecture
+
+```
+Host Machine
+     |
+  Bridge Network
+   /       \
+Container1  Container2
+```
+
+---
+
+# 2) Host Network
+
+Host network removes **network isolation between container and host**.
+
+### Characteristics
+
+- Container uses **host machine network**
+- **No separate IP address is assigned**
+- Container directly uses host network stack
+
+### Example
+
+```bash
+docker run --network host sb-app-image
+```
+
+### Architecture
+
+```
+Host Machine Network
+       |
+    Container
+```
+
+Note:
+
+```
+Port mapping (-p) is not required
+because container directly uses host ports
+```
+
+---
+
+# 3) None Network
+
+None network means **no networking is available**.
+
+### Characteristics
+
+- Container has **no network access**
+- No internet
+- Cannot communicate with other containers
+
+### Example
+
+```bash
+docker run --network none sb-app-image
+```
+
+### Architecture
+
+```
+Container (No Network Access)
+```
+
+---
+
+# Additional Docker Networks
+
+Docker also provides two advanced networks.
+
+```
+1) Overlay
+2) Macvlan
+```
+
+---
+
+# 4) Overlay Network
+
+Overlay network is used for **container communication across multiple hosts**.
+
+It is mainly used in **Docker Swarm (Orchestration)**.
+
+### Characteristics
+
+- Used in **multi-host environments**
+- Containers across different machines can communicate
+
+### Architecture
+
+```
+Host1                     Host2
+  |                         |
+Container A  <---->  Container B
+        (Overlay Network)
+```
+
+---
+
+# 5) Macvlan Network
+
+Macvlan allows a container to get a **physical IP address from the network**.
+
+### Characteristics
+
+- Container behaves like a **physical device**
+- Gets its **own MAC address**
+- Can directly communicate with the **LAN network**
+
+### Architecture
+
+```
+Physical Network
+      |
+   Router
+      |
+ -------------------------
+ |           |           |
+Host     Container1   Container2
+        (Physical IP)
+```
+
+---
+
+# Docker Network Commands
+
+## Display Docker Networks
+
+```bash
+docker network ls
+```
+
+Example Output
+
+```
+NETWORK ID     NAME      DRIVER    SCOPE
+8e12c3         bridge    bridge    local
+7a1b3d         host      host      local
+9c3d2f         none      null      local
+```
+
+---
+
+# Create Docker Network
+
+```bash
+docker network create ashokit-nw
+```
+
+---
+
+# Inspect Docker Network
+
+```bash
+docker network inspect ashokit-nw
+```
+
+This command shows detailed information about the network.
+
+---
+
+# Run Container with Custom Network
+
+```bash
+docker run -d -p 8080:8080 --network ashokit-nw sb-app-image
+```
+
+### Explanation
+
+```
+-d              -> run container in background
+-p 8080:8080    -> port mapping
+--network       -> attach container to specific network
+sb-app-image    -> docker image name
+```
+
+---
+
+# Delete Docker Network
+
+```bash
+docker network rm ashokit-nw
+```
+
+---
+
+# Real Example (Container Communication)
+
+Create a network
+
+```bash
+docker network create my-network
+```
+
+Run first container
+
+```bash
+docker run -d --name container1 --network my-network nginx
+```
+
+Run second container
+
+```bash
+docker run -d --name container2 --network my-network busybox
+```
+
+Now **container2 can communicate with container1**.
+
+Example
+
+```bash
+ping container1
+```
+
+---
+
+# Key Interview Points
+
+```
+Docker Network provides isolated communication between containers.
+
+Default Docker Networks
+1) bridge
+2) host
+3) none
+
+Advanced Networks
+1) overlay
+2) macvlan
+```
