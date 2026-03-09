@@ -1,0 +1,187 @@
+This guide explains how to create a **Kubernetes cluster on AWS using Amazon EKS** from an Ubuntu EC2 instance. The EC2 instance acts as a **management host** where we install tools like `kubectl`, `aws-cli`, and `eksctl` to create and manage the cluster.
+
+---
+
+## Kubernetes Cluster Types
+
+1. **Minikube**
+
+   * Single node cluster
+   * Used for local development and practice
+   * Runs control plane and worker node on the same machine
+
+2. **Kubeadm Cluster**
+
+   * Self-managed Kubernetes cluster
+   * User is responsible for installing and maintaining all components such as control plane, worker nodes, networking, and upgrades
+
+3. **Provider Managed Cluster**
+
+   * Cloud providers manage the Kubernetes control plane
+   * Examples:
+
+     * AWS EKS
+     * Azure AKS
+     * Google GKE
+   * Easier to manage but **chargeable**
+
+---
+
+## Architecture
+
+EC2 instance is used as a **management machine** to create and control the EKS cluster.
+
+EC2 (Management Host)
+│
+├── kubectl
+├── AWS CLI
+└── eksctl
+
+These tools interact with the AWS cloud to create the **EKS cluster with worker nodes**.
+
+---
+
+# Step 1: Launch Ubuntu EC2 Instance
+
+Create a new EC2 instance.
+
+Recommended configuration:
+
+Instance Type: `t2.micro`
+Operating System: `Ubuntu`
+
+Connect to the instance using SSH.
+
+---
+
+# Step 2: Install kubectl
+
+kubectl is the command line tool used to interact with Kubernetes clusters.
+
+```
+curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/kubectl
+chmod +x ./kubectl
+sudo mv ./kubectl /usr/local/bin
+kubectl version --short --client
+```
+
+---
+
+# Step 3: Install AWS CLI
+
+AWS CLI allows communication with AWS services from the terminal.
+
+```
+sudo apt install unzip -y
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+aws --version
+```
+
+---
+
+# Step 4: Install eksctl
+
+eksctl is the official CLI tool used to create and manage EKS clusters.
+
+```
+curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+sudo mv /tmp/eksctl /usr/local/bin
+eksctl version
+```
+
+---
+
+# Step 5: Create IAM Role
+
+1. Go to **AWS IAM Console**
+2. Click **Create Role**
+3. Select **Use Case → EC2**
+4. Attach permission:
+
+```
+AdministratorAccess
+```
+
+Role Name:
+
+```
+eksroleec2
+```
+
+Attach this role to the EC2 instance:
+
+EC2 → Select Instance → Security → Modify IAM Role → Attach `eksroleec2`
+
+This allows the EC2 machine to create AWS resources like VPC, worker nodes, and load balancers.
+
+---
+
+# Step 6: Create EKS Cluster
+
+Use the following command to create the cluster.
+
+```
+eksctl create cluster \
+--name shubhamit-cluster4 \
+--region ap-south-1 \
+--node-type t2.micro \
+--zones ap-south-1a,ap-south-1b
+```
+
+This command automatically creates:
+
+* VPC
+* Subnets
+* Security groups
+* Control plane
+* Worker nodes
+* Auto scaling group
+
+Cluster creation usually takes **10–15 minutes**.
+
+---
+
+# Step 7: Verify Cluster
+
+Check the worker nodes:
+
+```
+kubectl get nodes
+```
+
+If the nodes show **Ready**, the cluster is successfully created.
+
+---
+
+# Step 8: Delete Cluster
+
+To avoid AWS charges, delete the cluster after use.
+
+```
+eksctl delete cluster --name shubhamit-cluster4 --region ap-south-1
+```
+
+---
+
+## Tools Used
+
+| Tool    | Purpose                        |
+| ------- | ------------------------------ |
+| kubectl | Kubernetes command line tool   |
+| AWS CLI | Manage AWS services            |
+| eksctl  | Create and manage EKS clusters |
+
+---
+
+## Summary
+
+1. Launch EC2 instance
+2. Install kubectl
+3. Install AWS CLI
+4. Install eksctl
+5. Create IAM role and attach to EC2
+6. Create EKS cluster using eksctl
+7. Verify cluster using kubectl
+8. Delete cluster when finished to avoid charges
