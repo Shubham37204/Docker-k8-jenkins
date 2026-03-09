@@ -1,0 +1,197 @@
+# Kubernetes Resources Explained
+
+This document explains the most commonly used **Kubernetes resources and components** used for deploying, exposing, scaling, and monitoring applications inside a Kubernetes cluster.
+
+---
+
+# Kubernetes Core Resources
+
+The following resources are widely used in Kubernetes environments:
+
+1. Pods
+2. Services (ClusterIP, NodePort, LoadBalancer)
+3. Namespaces
+4. ReplicationController
+5. ReplicaSet
+6. Deployment
+7. DaemonSet
+8. StatefulSet
+9. Ingress Controller
+10. Horizontal Pod Autoscaler (HPA)
+11. Helm Charts
+12. Kubernetes Monitoring (Prometheus & Grafana)
+13. EFK Stack for log monitoring
+
+---
+
+# 1. Pod
+
+A **Pod** is the **smallest and simplest deployable unit in Kubernetes**.
+
+It represents a running instance of an application inside the cluster.
+
+Key points:
+
+* Applications in Kubernetes run inside Pods.
+* A Pod usually contains **one container**, but it can also contain multiple containers.
+* Pods are **ephemeral (short-lived)**.
+* If a Pod crashes or gets deleted, Kubernetes automatically creates a new one (self-healing).
+* Multiple Pods can run the same application for **high availability and load distribution**.
+* Pods are created using **YAML configuration files (Manifest files)**.
+* The YAML file specifies the **Docker image, ports, and container configuration**.
+
+Example Pod Manifest:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+spec:
+  containers:
+  - name: nginx-container
+    image: nginx
+    ports:
+    - containerPort: 80
+```
+
+Create Pod:
+
+```
+kubectl apply -f pod.yml
+```
+
+Check Pods:
+
+```
+kubectl get pods
+```
+
+---
+
+# 2. Kubernetes Services
+
+Pods are temporary and their IP addresses change frequently.
+
+A **Service** provides a **stable way to access Pods**.
+
+Services expose a group of Pods using a **single stable IP or DNS name**.
+
+There are three types of Kubernetes Services:
+
+1. ClusterIP
+2. NodePort
+3. LoadBalancer
+
+---
+
+# 3. ClusterIP Service
+
+ClusterIP is the **default Kubernetes service type**.
+
+Purpose:
+
+* Provides a **stable internal IP address** for accessing Pods.
+* Used for **communication between services inside the cluster**.
+
+Key points:
+
+* Pods are dynamic and their IP addresses change.
+* ClusterIP provides a **fixed virtual IP** that routes traffic to available Pods.
+* Only accessible **within the Kubernetes cluster**.
+
+Example:
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  type: ClusterIP
+  selector:
+    app: myapp
+  ports:
+  - port: 80
+    targetPort: 80
+```
+
+---
+
+# 4. NodePort Service
+
+NodePort exposes the application **outside the cluster** using the **Worker Node IP address**.
+
+How it works:
+
+```
+NodeIP:NodePort
+```
+
+Example:
+
+```
+192.168.1.10:30007
+```
+
+Key points:
+
+* Kubernetes opens a port between **30000–32767**.
+* External users can access the application using **Worker Node Public IP + NodePort**.
+* However, traffic goes through a single node which may cause **load imbalance**.
+
+Example NodePort Service:
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nodeport-service
+spec:
+  type: NodePort
+  selector:
+    app: myapp
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 30007
+```
+
+---
+
+# 5. LoadBalancer Service
+
+LoadBalancer service exposes applications **to the internet using a cloud provider load balancer**.
+
+Supported in cloud platforms like:
+
+* AWS
+* Azure
+* Google Cloud
+
+In AWS EKS, Kubernetes automatically creates an **AWS Elastic Load Balancer**.
+
+Advantages:
+
+* Distributes traffic across multiple worker nodes.
+* Provides **high availability**.
+* Handles external traffic efficiently.
+
+Example:
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: loadbalancer-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: myapp
+  ports:
+  - port: 80
+    targetPort: 80
+```
+
+After deployment, Kubernetes creates a **public load balancer URL**.
+
