@@ -1,0 +1,227 @@
+---
+
+# Kubernetes NodePort Service
+
+A **NodePort Service** is used to expose an application running inside a Kubernetes cluster to external users.
+
+When a service is created with type **NodePort**, Kubernetes opens a specific port on every worker node. External users can access the application using the **Node IP address and NodePort**.
+
+Traffic Flow
+
+```
+User → Node Public IP : NodePort → Service → Pod → Container
+```
+
+Example NodePort Service Manifest
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: javawebappsvc
+
+spec:
+  type: NodePort
+
+  selector:
+    app: javawebapp
+
+  ports:
+  - port: 80
+    targetPort: 8080
+```
+
+In this configuration:
+
+| Field | Meaning |
+|------|--------|
+| port | Service port |
+| targetPort | Container port |
+| type | Service type (NodePort) |
+
+---
+
+# What is NodePort Number?
+
+When we do not specify a `nodePort` value in the service YAML file, Kubernetes automatically assigns a **random port**.
+
+Default NodePort range:
+
+```
+30000 - 32767
+```
+
+Example:
+
+```
+NodePort automatically assigned → 30045
+```
+
+You can check it using:
+
+```bash
+kubectl get service
+```
+
+---
+
+# Specify Custom NodePort
+
+If you want to define a specific NodePort number, you can add the **nodePort field**.
+
+Example:
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: javawebappsvc
+
+spec:
+  type: NodePort
+
+  selector:
+    app: javawebapp
+
+  ports:
+  - port: 80
+    targetPort: 8080
+    nodePort: 30070
+```
+
+Now the application will be accessible using:
+
+```
+NodePort → 30070
+```
+
+---
+
+# Deploy NodePort Service
+
+Apply manifest file
+
+```bash
+kubectl apply -f service.yaml
+```
+
+Check pods
+
+```bash
+kubectl get pods
+```
+
+Check services
+
+```bash
+kubectl get service
+```
+
+Check pod node details
+
+```bash
+kubectl get pods -o wide
+```
+
+---
+
+# Important AWS / Cloud Configuration
+
+If you are running Kubernetes on **AWS EC2 worker nodes**, you must allow the NodePort in the **Security Group inbound rules**.
+
+Example rule
+
+```
+Type : Custom TCP
+Port : 30070
+Source : 0.0.0.0/0
+```
+
+---
+
+# Access Application Using NodePort
+
+Application URL format
+
+```
+http://node-public-ip:node-port/java-web-app
+```
+
+Example
+
+```
+http://3.110.25.120:30070/java-web-app
+```
+
+---
+
+# Kubernetes ClusterIP Service
+
+A **ClusterIP Service** exposes pods **only inside the Kubernetes cluster**.
+
+This is the **default service type**.
+
+When a ClusterIP service is created, Kubernetes assigns a **static internal IP address** that can be used by other services within the cluster.
+
+Example ClusterIP Manifest
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: javawebappsvc
+
+spec:
+  type: ClusterIP
+
+  selector:
+    app: javawebapp
+
+  ports:
+  - port: 80
+    targetPort: 8080
+```
+
+---
+
+# ClusterIP Traffic Flow
+
+```
+Pod A → ClusterIP Service → Pod B
+```
+
+ClusterIP is typically used for:
+
+- Microservice communication
+- Internal APIs
+- Database services
+- Backend services
+
+Example
+
+```
+Frontend Pod → Backend Service (ClusterIP) → Backend Pod
+```
+
+---
+
+# NodePort vs ClusterIP
+
+| Feature | NodePort | ClusterIP |
+|-------|--------|---------|
+| Access | External + Internal | Internal Only |
+| Port Range | 30000–32767 | No external port |
+| Use Case | Testing / Direct Access | Microservice communication |
+| Exposure | Public | Private |
+
+---
+
+# Summary
+
+| Service Type | Purpose |
+|--------------|--------|
+| ClusterIP | Internal service communication |
+| NodePort | Exposes service using node IP and port |
+| LoadBalancer | Creates external cloud load balancer |
+
+---
