@@ -1,22 +1,23 @@
-# Kubernetes Namespaces, Pods and Services
+# Kubernetes Namespaces, Pods and Services (Manifest YAML Guide)
 
-# 1. Kubernetes Namespaces
+# Kubernetes Namespaces
 
-A **Namespace** in Kubernetes is used to logically group resources inside a cluster.
+Namespaces in Kubernetes are used to **group and organize resources** inside a cluster.
 
-In a Kubernetes cluster, multiple applications and teams may use the same cluster. Namespaces help organize and isolate resources.
+In real-world environments, a single Kubernetes cluster can run multiple applications. Namespaces help to separate these applications logically.
 
-### Example
+Example:
 
-Frontend Application Pods → frontend-app-ns  
-Backend Application Pods → backend-app-ns  
-Database Pods → database-ns  
+Frontend Application Pods → `frontend-app-ns`  
+Backend Application Pods → `backend-app-ns`  
+Database Pods → `database-ns`
 
-Namespaces help in:
+Benefits of Namespaces:
 
-- Resource organization
-- Multi-team usage
-- Environment separation (dev, test, prod)
+- Logical grouping of resources
+- Isolation between applications
+- Multi-team environment support
+- Environment separation (Dev / Test / Prod)
 
 Example Namespace YAML
 
@@ -25,3 +26,330 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: frontend-app-ns
+```
+
+Create namespace
+
+```bash
+kubectl apply -f namespace.yaml
+```
+
+Check namespaces
+
+```bash
+kubectl get namespaces
+```
+
+---
+
+# Kubernetes Manifest YAML
+
+In Kubernetes, applications are deployed using **Manifest YAML files**.
+
+A Manifest file describes the **desired state of a Kubernetes resource** such as Pods, Services, Deployments, etc.
+
+Basic Manifest Syntax
+
+```yaml
+---
+apiVersion: <version-number>
+kind: <resource-type>
+metadata:
+  name: <resource-name>
+spec:
+  <configuration>
+```
+
+Explanation
+
+| Field | Description |
+|------|-------------|
+| apiVersion | Version of Kubernetes API |
+| kind | Type of Kubernetes resource |
+| metadata | Resource details such as name and labels |
+| spec | Desired configuration |
+
+Deploy Manifest File
+
+```bash
+kubectl apply -f <manifest-file>
+```
+
+Example
+
+```bash
+kubectl apply -f pod.yaml
+```
+
+---
+
+# Kubernetes Pod
+
+A **Pod** is the **smallest deployable unit in Kubernetes**.
+
+A Pod contains **one or more containers** that share:
+
+- Network
+- Storage
+- IP Address
+
+Example Pod Manifest YAML
+
+```yaml
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: javawebapppod
+  labels:
+    app: javawebapp
+
+spec:
+  containers:
+  - name: javawebappcontainer
+    image: ashokit/javawebapp
+    ports:
+    - containerPort: 8080
+```
+
+Explanation
+
+| Field | Meaning |
+|------|--------|
+| name | Name of the Pod |
+| labels | Used to identify pods |
+| containers | List of containers |
+| image | Docker image used |
+| containerPort | Port exposed by container |
+
+---
+
+# Kubernetes Pod Commands
+
+Check pods
+
+```bash
+kubectl get pods
+```
+
+Check pods with worker node information
+
+```bash
+kubectl get pods -o wide
+```
+
+Describe pod
+
+```bash
+kubectl describe pod <pod-name>
+```
+
+Get pod logs
+
+```bash
+kubectl logs <pod-name>
+```
+
+Execute manifest file
+
+```bash
+kubectl apply -f <manifest-yml>
+```
+
+---
+
+# Kubernetes Service
+
+A **Service** is used to **expose Pods to the network**.
+
+Pods are temporary resources and their IP addresses may change.  
+Services provide a **stable endpoint to access pods**.
+
+Traffic Flow
+
+```
+Client → Service → Pod → Container
+```
+
+---
+
+# Types of Kubernetes Services
+
+| Service Type | Description |
+|--------------|-------------|
+| ClusterIP | Internal communication inside cluster |
+| NodePort | Exposes service using node port |
+| LoadBalancer | Creates external cloud load balancer |
+| ExternalName | Maps service to external DNS |
+
+---
+
+# Kubernetes Service Manifest YAML
+
+Example Service Manifest
+
+```yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: javawebappsvc
+
+spec:
+  type: LoadBalancer
+
+  selector:
+    app: javawebapp
+
+  ports:
+  - port: 80
+    targetPort: 8080
+```
+
+Explanation
+
+| Field | Meaning |
+|------|--------|
+| type | Service exposure type |
+| selector | Selects pods using labels |
+| port | Port exposed by service |
+| targetPort | Container port |
+
+---
+
+# Deploy Service
+
+Check services
+
+```bash
+kubectl get service
+```
+
+Create service
+
+```bash
+kubectl apply -f service-manifest.yaml
+```
+
+When the service type is **LoadBalancer**, Kubernetes automatically creates a **cloud load balancer**.
+
+In AWS you can see it in the **EC2 Dashboard**.
+
+Application URL Example
+
+```
+http://LOAD-BALANCER-DNS/java-web-app/
+```
+
+---
+
+# Pod and Service in Single YAML File
+
+Kubernetes allows defining multiple resources in a single YAML file using `---`.
+
+Example:
+
+```yaml
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: javawebapppod
+  labels:
+    app: javawebapp
+
+spec:
+  containers:
+  - name: javawebappcontainer
+    image: ashokit/javawebapp
+    ports:
+    - containerPort: 8080
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: javawebappsvc
+
+spec:
+  type: LoadBalancer
+
+  selector:
+    app: javawebapp
+
+  ports:
+  - port: 80
+    targetPort: 8080
+```
+
+Execute the manifest file
+
+```bash
+kubectl apply -f manifest.yaml
+```
+
+---
+
+# Verify Resources
+
+Check pods
+
+```bash
+kubectl get pods
+```
+
+Check services
+
+```bash
+kubectl get service
+```
+
+---
+
+# Delete Resources
+
+Delete all resources created
+
+```bash
+kubectl delete all --all
+```
+
+Delete specific resource
+
+```bash
+kubectl delete pod <pod-name>
+kubectl delete service <service-name>
+```
+
+---
+
+# Kubernetes Deployment Flow
+
+```
+Developer writes YAML
+        ↓
+kubectl apply -f manifest.yaml
+        ↓
+Kubernetes API Server
+        ↓
+Scheduler assigns Worker Node
+        ↓
+Pod runs on Worker Node
+        ↓
+Service exposes Pod
+        ↓
+Users access the application
+```
+
+---
+
+# Summary
+
+| Component | Purpose |
+|----------|--------|
+| Namespace | Logical grouping of resources |
+| Pod | Smallest deployable unit |
+| Container | Runs application |
+| Service | Exposes pods |
+| Manifest YAML | Defines Kubernetes resources |
