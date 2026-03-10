@@ -1,10 +1,8 @@
----
-
 # Kubernetes NodePort Service
 
-A **NodePort Service** is used to expose an application running inside a Kubernetes cluster to external users.
+A **NodePort Service** exposes an application running inside a Kubernetes cluster to external users.
 
-When a service is created with type **NodePort**, Kubernetes opens a specific port on every worker node. External users can access the application using the **Node IP address and NodePort**.
+When a service is created with type **NodePort**, Kubernetes opens a specific port on every worker node. Users can access the application using the **Node Public IP and NodePort**.
 
 Traffic Flow
 
@@ -12,7 +10,9 @@ Traffic Flow
 User → Node Public IP : NodePort → Service → Pod → Container
 ```
 
-Example NodePort Service Manifest
+---
+
+## NodePort Service Manifest YAML
 
 ```yaml
 apiVersion: v1
@@ -31,19 +31,20 @@ spec:
     targetPort: 8080
 ```
 
-In this configuration:
+Explanation
 
-| Field | Meaning |
-|------|--------|
+| Field | Description |
+|------|-------------|
+| type | Service type |
 | port | Service port |
 | targetPort | Container port |
-| type | Service type (NodePort) |
+| selector | Selects pods using labels |
 
 ---
 
 # What is NodePort Number?
 
-When we do not specify a `nodePort` value in the service YAML file, Kubernetes automatically assigns a **random port**.
+If we do not specify a `nodePort` in the service manifest YAML, Kubernetes automatically assigns a **random port number**.
 
 Default NodePort range:
 
@@ -51,13 +52,7 @@ Default NodePort range:
 30000 - 32767
 ```
 
-Example:
-
-```
-NodePort automatically assigned → 30045
-```
-
-You can check it using:
+You can verify it using:
 
 ```bash
 kubectl get service
@@ -67,7 +62,7 @@ kubectl get service
 
 # Specify Custom NodePort
 
-If you want to define a specific NodePort number, you can add the **nodePort field**.
+If you want a specific NodePort, you can define it in the YAML file.
 
 Example:
 
@@ -87,12 +82,6 @@ spec:
   - port: 80
     targetPort: 8080
     nodePort: 30070
-```
-
-Now the application will be accessible using:
-
-```
-NodePort → 30070
 ```
 
 ---
@@ -117,7 +106,7 @@ Check services
 kubectl get service
 ```
 
-Check pod node details
+Check worker node where pod is running
 
 ```bash
 kubectl get pods -o wide
@@ -125,9 +114,9 @@ kubectl get pods -o wide
 
 ---
 
-# Important AWS / Cloud Configuration
+# Important AWS Configuration
 
-If you are running Kubernetes on **AWS EC2 worker nodes**, you must allow the NodePort in the **Security Group inbound rules**.
+If Kubernetes worker nodes are running on **AWS EC2**, the NodePort must be allowed in the **Security Group inbound rules**.
 
 Example rule
 
@@ -141,7 +130,7 @@ Source : 0.0.0.0/0
 
 # Access Application Using NodePort
 
-Application URL format
+Application URL
 
 ```
 http://node-public-ip:node-port/java-web-app
@@ -157,11 +146,11 @@ http://3.110.25.120:30070/java-web-app
 
 # Kubernetes ClusterIP Service
 
-A **ClusterIP Service** exposes pods **only inside the Kubernetes cluster**.
+A **ClusterIP Service** exposes pods **only within the Kubernetes cluster**.
 
-This is the **default service type**.
+It is the **default service type** in Kubernetes.
 
-When a ClusterIP service is created, Kubernetes assigns a **static internal IP address** that can be used by other services within the cluster.
+When a ClusterIP service is created, Kubernetes assigns a **static internal IP** that allows communication between services inside the cluster.
 
 Example ClusterIP Manifest
 
@@ -184,18 +173,18 @@ spec:
 
 ---
 
-# ClusterIP Traffic Flow
+# ClusterIP Communication Flow
 
 ```
 Pod A → ClusterIP Service → Pod B
 ```
 
-ClusterIP is typically used for:
+Common Use Cases
 
-- Microservice communication
-- Internal APIs
-- Database services
 - Backend services
+- Database services
+- Internal APIs
+- Microservice communication
 
 Example
 
@@ -210,18 +199,188 @@ Frontend Pod → Backend Service (ClusterIP) → Backend Pod
 | Feature | NodePort | ClusterIP |
 |-------|--------|---------|
 | Access | External + Internal | Internal Only |
-| Port Range | 30000–32767 | No external port |
-| Use Case | Testing / Direct Access | Microservice communication |
-| Exposure | Public | Private |
+| Port Range | 30000–32767 | Internal IP only |
+| Use Case | Testing / External access | Microservice communication |
 
 ---
 
-# Summary
+# Kubernetes Namespaces
 
-| Service Type | Purpose |
-|--------------|--------|
-| ClusterIP | Internal service communication |
-| NodePort | Exposes service using node IP and port |
-| LoadBalancer | Creates external cloud load balancer |
+Namespaces are used to **group Kubernetes resources**.
+
+Example grouping
+
+```
+frontend-app-pods → frontend namespace
+backend-app-pods → backend namespace
+database-pods → database namespace
+```
+
+We can create **multiple namespaces in a Kubernetes cluster**.
+
+Example
+
+```
+ashokit-a1-ns
+ashokit-a2-ns
+```
+
+Each namespace is **isolated from other namespaces**.
+
+Important Note
+
+When we delete a namespace, **all resources inside that namespace are deleted automatically**.
+
+---
+
+# Display Namespaces
+
+```bash
+kubectl get ns
+```
+
+---
+
+# Get Pods from Specific Namespace
+
+Example: pods from kube-system namespace
+
+```bash
+kubectl get pods -n kube-system
+```
+
+If namespace is not specified, Kubernetes uses the **default namespace**.
+
+---
+
+# Create Namespace
+
+Namespaces can be created in **two ways**.
+
+---
+
+## Approach 1: Using Command
+
+```bash
+kubectl create ns ashokit-ns
+```
+
+---
+
+## Approach 2: Using Manifest YAML
+
+```yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ashokit-ns-2
+```
+
+Apply YAML
+
+```bash
+kubectl apply -f namespace.yaml
+```
+
+---
+
+# Delete Namespace
+
+```bash
+kubectl delete ns <namespace-name>
+```
+
+Example
+
+```bash
+kubectl delete ns ashokit-ns
+```
+
+---
+
+# Example: Namespace + Pod + Service in One YAML
+
+```yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ashokit-ns
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: javawebapppod
+  namespace: ashokit-ns
+  labels:
+    app: javawebapp
+
+spec:
+  containers:
+  - name: javawebappcontainer
+    image: ashokit/javawebapp
+    ports:
+    - containerPort: 8080
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: javawebappsvc
+  namespace: ashokit-ns
+
+spec:
+  type: LoadBalancer
+  selector:
+    app: javawebapp
+
+  ports:
+  - port: 80
+    targetPort: 8080
+```
+
+Apply YAML
+
+```bash
+kubectl apply -f manifest.yaml
+```
+
+---
+
+# Verify Namespace Resources
+
+Check namespaces
+
+```bash
+kubectl get ns
+```
+
+Check pods inside namespace
+
+```bash
+kubectl get pods -n ashokit-ns
+```
+
+Check services inside namespace
+
+```bash
+kubectl get service -n ashokit-ns
+```
+
+Check all resources inside namespace
+
+```bash
+kubectl get all -n ashokit-ns
+```
+
+---
+
+# Delete Namespace
+
+Deleting the namespace removes **all resources inside it**.
+
+```bash
+kubectl delete ns ashokit-ns
+```
 
 ---
