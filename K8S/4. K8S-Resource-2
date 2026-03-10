@@ -1,0 +1,27 @@
+# Kubernetes Namespaces, Pods and Services
+
+# 1. Kubernetes Namespaces
+
+A **Namespace** in Kubernetes is used to logically group resources inside a cluster.
+
+In a Kubernetes cluster, multiple applications and teams may use the same cluster. Namespaces help organize and isolate resources.
+
+### Example
+
+Frontend Application Pods → frontend-app-ns  
+Backend Application Pods → backend-app-ns  
+Database Pods → database-ns  
+
+Namespaces help in:
+
+- Resource organization
+- Multi-team usage
+- Environment separation (dev, test, prod)
+
+Example Namespace YAML
+
+```yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: frontend-app-ns
