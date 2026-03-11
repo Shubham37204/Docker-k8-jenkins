@@ -1,0 +1,324 @@
+# Kubernetes ReplicaSet – Managing Pods in Kubernetes
+
+## Why We Should Not Create Pods Directly
+
+In Kubernetes, we can create a Pod directly using a **Pod Manifest YAML file**.
+
+Example:
+
+```yaml
+kind: Pod
+```
+
+However, creating Pods directly is **not recommended for production environments**.
+
+### Problems with Creating Pods Directly
+
+* Kubernetes will **not automatically recreate the Pod** if it crashes or is deleted.
+* There is **no self-healing capability**.
+* If the Pod fails, the **application becomes unavailable**.
+* Pod lifecycle will **not be managed automatically**.
+
+Example scenario:
+
+```
+Pod crashes → Kubernetes does nothing → Application becomes unavailable
+```
+
+Because of these limitations, **Pods should always be created using Kubernetes controllers/resources**.
+
+---
+
+# Kubernetes Resources Used to Create Pods
+
+Instead of creating Pods directly, Kubernetes provides controllers that manage Pods automatically.
+
+These controllers ensure:
+
+* High availability
+* Self-healing
+* Scalability
+
+Common Kubernetes resources used to manage Pods:
+
+1. ReplicationController (Outdated)
+2. ReplicaSet
+3. Deployment
+4. DaemonSet
+5. StatefulSet
+
+---
+
+# ReplicaSet
+
+## What is ReplicaSet?
+
+ReplicaSet is a **Kubernetes controller that creates and manages multiple identical Pods**.
+
+Its primary purpose is to **maintain a stable set of replica Pods running at any given time**.
+
+ReplicaSet ensures that the **specified number of Pod replicas are always running**.
+
+Example:
+
+```
+replicas: 2
+```
+
+This means Kubernetes will always ensure **2 Pods are running**.
+
+---
+
+# Self-Healing Capability
+
+ReplicaSet continuously monitors Pods.
+
+If a Pod fails or gets deleted:
+
+```
+Pod crashed/deleted → ReplicaSet detects it → ReplicaSet creates a new Pod
+```
+
+This feature is called **Self-Healing**.
+
+---
+
+# High Availability
+
+If we run only **one Pod**, the application becomes unavailable when the Pod crashes.
+
+ReplicaSet allows us to run **multiple Pods**.
+
+Example:
+
+```
+replicas: 2
+```
+
+Now two Pods run simultaneously.
+
+Even if one Pod fails, the **other Pod keeps serving the application**.
+
+This provides **High Availability**.
+
+---
+
+# Scaling Pods with ReplicaSet
+
+ReplicaSet allows scaling the number of Pods.
+
+Two operations are possible:
+
+### Scale Up
+
+Increase the number of Pods.
+
+Example:
+
+```
+2 Pods → 3 Pods
+```
+
+### Scale Down
+
+Decrease the number of Pods.
+
+Example:
+
+```
+3 Pods → 1 Pod
+```
+
+Scaling using command:
+
+```bash
+kubectl scale rs javawebrs --replicas 3
+```
+
+ReplicaSet checks the **current number of running Pods** and decides whether to create or delete Pods.
+
+---
+
+# ReplicaSet YAML Example
+
+```yaml
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: javawebrs
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: javawebapp
+
+  template:
+    metadata:
+      name: javawebpod
+      labels:
+        app: javawebapp
+
+    spec:
+      containers:
+      - name: javawebcontainer
+        image: ashokit/javawebapp
+        ports:
+        - containerPort: 8080
+```
+
+### Explanation
+
+| Field      | Description                             |
+| ---------- | --------------------------------------- |
+| apiVersion | API version used for ReplicaSet         |
+| kind       | Resource type                           |
+| metadata   | Name of the ReplicaSet                  |
+| replicas   | Number of Pods to maintain              |
+| selector   | Used to identify which Pods are managed |
+| template   | Pod template used to create Pods        |
+| containers | Container configuration                 |
+
+---
+
+# Service YAML Example
+
+A **Service** is used to expose Pods so users can access the application.
+
+```yaml
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: javawebappsvc
+  namespace: ashokit-ns
+
+spec:
+  type: LoadBalancer
+
+  selector:
+    app: javawebapp
+
+  ports:
+  - port: 80
+    targetPort: 8080
+```
+
+### Explanation
+
+| Field              | Description                               |
+| ------------------ | ----------------------------------------- |
+| type: LoadBalancer | Exposes application externally            |
+| selector           | Selects Pods with label `app: javawebapp` |
+| port               | External port                             |
+| targetPort         | Container port                            |
+
+---
+
+# Useful Kubernetes Commands
+
+### View all Kubernetes resources
+
+```bash
+kubectl get all
+```
+
+### Apply YAML configuration
+
+```bash
+kubectl apply -f <file-name>.yml
+```
+
+### Check running Pods
+
+```bash
+kubectl get pods
+```
+
+### Check ReplicaSets
+
+```bash
+kubectl get rs
+```
+
+### Delete a Pod
+
+```bash
+kubectl delete pod <pod-name>
+```
+
+ReplicaSet will **automatically create a new Pod**.
+
+### Scale Pods
+
+```bash
+kubectl scale rs javawebrs --replicas 3
+```
+
+### Delete ReplicaSet
+
+```bash
+kubectl delete rs javawebrs
+```
+
+When ReplicaSet is deleted, **all Pods created by it are also deleted**.
+
+---
+
+# Important Notes
+
+* Pods **should not be created directly** in production.
+* Always use **ReplicaSet or Deployment** to manage Pods.
+* ReplicaSet provides:
+
+  * Self-healing
+  * High availability
+  * Manual scaling
+
+---
+
+# Limitation of ReplicaSet
+
+ReplicaSet **does not support automatic scaling**.
+
+Scaling must be done manually.
+
+Example:
+
+```
+kubectl scale rs javawebrs --replicas 3
+```
+
+---
+
+# Why Deployment is Preferred
+
+In modern Kubernetes applications, **Deployment is used instead of ReplicaSet** because it provides:
+
+* Rolling updates
+* Rollbacks
+* Auto scaling support
+* Version control for Pods
+
+Deployment internally **uses ReplicaSet to manage Pods**.
+
+---
+
+# Summary
+
+| Feature           | Pod  | ReplicaSet |
+| ----------------- | ---- | ---------- |
+| Self-Healing      | ❌ No | ✅ Yes      |
+| High Availability | ❌ No | ✅ Yes      |
+| Scaling           | ❌ No | ✅ Manual   |
+| Production Ready  | ❌ No | ✅ Yes      |
+
+---
+
+# Conclusion
+
+ReplicaSet is a **Kubernetes controller responsible for maintaining the desired number of Pods**.
+It ensures **self-healing, high availability, and scalability** of applications running inside a Kubernetes cluster.
+
+However, in modern Kubernetes environments, **Deployments are preferred because they provide advanced features like rolling updates and auto scaling**.
