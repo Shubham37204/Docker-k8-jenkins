@@ -1,0 +1,304 @@
+# Kubernetes Deployment
+
+A **Deployment** is a Kubernetes resource used to deploy and manage applications.
+
+It manages the lifecycle of Pods and ensures that the desired number of Pods are always running.
+
+Instead of creating Pods directly, Kubernetes recommends using Deployments because they provide:
+
+* Self Healing
+* Scaling
+* Rolling Updates
+* Rollbacks
+* Zero Downtime Deployments
+
+Deployment internally creates a **ReplicaSet**, which maintains the required number of Pods.
+
+---
+
+# Advantages of Deployment
+
+## Zero Downtime
+
+Deployments update applications gradually using Rolling Updates so users never experience downtime.
+
+## Auto Scaling
+
+Deployments allow scaling the number of pods based on workload.
+
+## Rolling Updates & Rollback
+
+Applications can be updated without downtime and rolled back if errors occur.
+
+---
+
+# Deployment Strategies
+
+## ReCreate Strategy
+
+Deletes all existing Pods and creates new Pods.
+
+Disadvantage:
+Application becomes temporarily unavailable.
+
+---
+
+## RollingUpdate Strategy
+
+Updates Pods one by one.
+
+Steps:
+
+1. Create new Pod
+2. Wait until ready
+3. Delete old Pod
+
+This ensures zero downtime.
+
+---
+
+# Deployment YAML
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: javawebdeploy
+spec:
+ replicas: 2
+ strategy:
+  type: RollingUpdate
+ selector:
+  matchLabels:
+   app: javawebapp
+ template:
+  metadata:
+   name: javawebpod
+   labels:
+    app: javawebapp
+  spec:
+   containers:
+   - name: javawebappcontainer
+     image: ashokit/javawebapp
+     ports:
+     - containerPort: 8080
+```
+
+---
+
+# Service YAML
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+ name: javawebsvc
+spec:
+ type: LoadBalancer
+ selector:
+  app: javawebapp
+ ports:
+  - port: 80
+    targetPort: 8080
+```
+
+---
+
+# Kubernetes Commands
+
+Delete all resources
+
+```
+kubectl delete all --all
+```
+
+Check resources
+
+```
+kubectl get all
+```
+
+Deploy application
+
+```
+kubectl apply -f deployment.yml
+```
+
+Scale pods
+
+```
+kubectl scale deployment javawebdeploy --replicas=4
+```
+
+---
+
+# Autoscaling in Kubernetes
+
+Autoscaling automatically increases or decreases infrastructure resources based on demand.
+
+## Horizontal Scaling
+
+Increase number of pods.
+
+Example
+
+```
+2 pods → 5 pods
+```
+
+## Vertical Scaling
+
+Increase CPU or memory of a single pod.
+
+Example
+
+```
+1 CPU → 4 CPU
+```
+
+---
+
+# Horizontal Pod Autoscaler (HPA)
+
+HPA automatically scales pods based on CPU or memory usage.
+
+Example:
+
+```
+CPU > 50% → increase pods
+CPU < 50% → decrease pods
+```
+
+---
+
+# Metrics Server
+
+Metrics Server collects resource usage from:
+
+* Nodes
+* Pods
+
+Commands:
+
+```
+kubectl top nodes
+kubectl top pods
+```
+
+---
+
+# Install Metrics Server
+
+Clone repository
+
+```
+git clone https://github.com/ashokitschool/k8s_metrics_server
+```
+
+Enter directory
+
+```
+cd k8s_metrics_server
+```
+
+Apply manifest
+
+```
+kubectl apply -f deploy/1.8+/
+```
+
+Verify installation
+
+```
+kubectl get all -n kube-system
+```
+
+---
+
+# Deploy Sample Application
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: hpa-demo-deployment
+spec:
+ selector:
+   matchLabels:
+     run: hpa-demo-deployment
+ replicas: 1
+ template:
+   metadata:
+     labels:
+       run: hpa-demo-deployment
+   spec:
+     containers:
+     - name: hpa-demo-deployment
+       image: k8s.gcr.io/hpa-example
+       ports:
+       - containerPort: 80
+       resources:
+         limits:
+           cpu: 500m
+         requests:
+           cpu: 200m
+```
+
+---
+
+# Create Service
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+ name: hpa-demo-deployment
+ labels:
+   run: hpa-demo-deployment
+spec:
+ ports:
+ - port: 80
+ selector:
+   run: hpa-demo-deployment
+```
+
+---
+
+# Create HPA
+
+```yaml
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+ name: hpa-demo-deployment
+spec:
+ scaleTargetRef:
+  apiVersion: apps/v1
+  kind: Deployment
+  name: hpa-demo-deployment
+ minReplicas: 1
+ maxReplicas: 10
+ targetCPUUtilizationPercentage: 50
+```
+
+---
+
+# Generate Load
+
+```
+kubectl run -i --tty load-generator --rm --image=busybox --restart=Never -- /bin/sh -c "while sleep 0.01; do wget -q -O- http://hpa-demo-deployment; done"
+```
+
+---
+
+# Monitor Autoscaling
+
+```
+kubectl get hpa -w
+kubectl describe deploy hpa-demo-deployment
+kubectl get events
+kubectl top pods
+```
+
+Pods will automatically scale based on CPU usage.
+
