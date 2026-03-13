@@ -1,9 +1,3 @@
-# Kubernetes Blue-Green Deployment 🚀
-
-This project demonstrates how to implement **Blue-Green Deployment in Kubernetes** to achieve **zero-downtime application releases**.
-
----
-
 # 📘 What is Blue-Green Deployment?
 
 Blue-Green deployment is a strategy used to release new application versions with **zero downtime and minimal risk**.
