@@ -1,0 +1,259 @@
+# Kubernetes Blue-Green Deployment 🚀
+
+This project demonstrates how to implement **Blue-Green Deployment in Kubernetes** to achieve **zero-downtime application releases**.
+
+---
+
+# 📘 What is Blue-Green Deployment?
+
+Blue-Green deployment is a strategy used to release new application versions with **zero downtime and minimal risk**.
+
+Two identical environments are maintained:
+
+| Environment | Description |
+|---|---|
+| Blue | Current live production version |
+| Green | New version for testing |
+
+Only **one environment serves production traffic at a time**.
+
+Once the new version is tested successfully, traffic is switched from **Blue → Green**.
+
+---
+
+# 🏗 Architecture
+
+```
+           Users
+             |
+             v
+      Kubernetes Service
+             |
+     --------------------
+     |                  |
+ Blue Pods (v1)     Green Pods (v2)
+ Production          New Version
+```
+
+Initially traffic goes to **Blue Pods**.
+
+After validation, traffic switches to **Green Pods**.
+
+---
+
+# 📂 Repository Setup
+
+Clone the repository:
+
+```
+git clone https://github.com/ashokitschool/kubernetes_manifest_yml_files.git
+```
+
+Navigate to the project directory:
+
+```
+cd kubernetes_manifest_yml_files/blue-green
+```
+
+---
+
+# ⚙️ Deployment Steps
+
+---
+
+# Step 1: Deploy Blue Version
+
+Create the **Blue Deployment (v1)**.
+
+```
+kubectl apply -f blue-deployment.yml
+```
+
+Verify pods:
+
+```
+kubectl get pods
+```
+
+---
+
+# Step 2: Create Live Service
+
+Expose Blue pods using a LoadBalancer service.
+
+```
+kubectl apply -f live-service.yml
+```
+
+Check service:
+
+```
+kubectl get svc
+```
+
+Open the **EXTERNAL-IP** in the browser.
+
+You should see response from:
+
+```
+Blue Pods (v1)
+```
+
+---
+
+# Step 3: Deploy Green Version
+
+Deploy the **new version (v2)** of the application.
+
+```
+kubectl apply -f green-deployment.yml
+```
+
+Check pods:
+
+```
+kubectl get pods
+```
+
+Now both versions exist:
+
+```
+Blue Pods (v1)
+Green Pods (v2)
+```
+
+---
+
+# Step 4: Create Pre-Production Service
+
+Expose Green pods for testing.
+
+```
+kubectl apply -f preprod-service.yml
+```
+
+QA team can access the new version via the **Pre-Prod Service URL**.
+
+---
+
+# Step 5: Test Green Version
+
+Access the Pre-Prod service and validate:
+
+- Application functionality
+- Performance
+- Logs
+- Errors
+
+Ensure everything works correctly before switching traffic.
+
+---
+
+# Step 6: Switch Traffic to Green (Make it Live)
+
+Update the **Live Service selector**.
+
+Before:
+
+```
+selector:
+  version: v1
+```
+
+After:
+
+```
+selector:
+  version: v2
+```
+
+Apply the changes:
+
+```
+kubectl apply -f live-service.yml
+```
+
+Now production traffic routes to:
+
+```
+Green Pods (v2)
+```
+
+---
+
+# Step 7: Verify Deployment
+
+Access the **Live Service URL** again.
+
+You should now see:
+
+```
+Green Pods Response
+```
+
+---
+
+# 🔄 Rollback Strategy
+
+If any issue occurs:
+
+Update the service selector back to:
+
+```
+selector:
+  version: v1
+```
+
+Apply again:
+
+```
+kubectl apply -f live-service.yml
+```
+
+Traffic will instantly return to **Blue Pods**.
+
+---
+
+# ⭐ Advantages of Blue-Green Deployment
+
+✔ Zero downtime deployment  
+✔ Instant rollback  
+✔ Safe testing in production  
+✔ Easy release management  
+✔ No impact on users during deployment
+
+---
+
+# 🛠 Technologies Used
+
+- Kubernetes
+- Deployments
+- Services
+- Labels & Selectors
+- LoadBalancer
+
+---
+
+# 📚 Useful Commands
+
+```
+kubectl get pods
+kubectl get svc
+kubectl get deployments
+kubectl describe pod <pod-name>
+kubectl logs <pod-name>
+```
+
+---
+
+# 📌 Conclusion
+
+Blue-Green deployment is one of the safest deployment strategies in Kubernetes.
+
+It allows teams to:
+
+- Release new versions without downtime
+- Test new releases safely
+- Perform instant rollback if needed
+
+This approach is widely used in **DevOps, CI/CD pipelines, and production Kubernetes environments**.
