@@ -1,0 +1,499 @@
+---
+
+# 📦 What is Helm?
+
+**Helm** is a **package manager for Kubernetes** used to install and manage applications in a Kubernetes cluster.
+
+Helm works similarly to package managers used in operating systems:
+
+| Package Manager | Platform       |
+| --------------- | -------------- |
+| apt             | Ubuntu         |
+| yum             | CentOS         |
+| npm             | Node.js        |
+| pip             | Python         |
+| **Helm**        | **Kubernetes** |
+
+Helm installs applications using **Helm Charts**, which are packages containing Kubernetes configuration files.
+
+Example applications installed using Helm:
+
+* Prometheus
+* Grafana
+* Nginx Ingress Controller
+* ELK Stack
+* Metrics Server
+
+---
+
+# ⚡ Why Use Helm?
+
+Deploying an application in Kubernetes typically requires creating multiple resources:
+
+* Deployment
+* Service
+* ConfigMaps
+* Secrets
+* Volumes
+* Ingress
+* HPA (Horizontal Pod Autoscaler)
+
+Managing these resources manually using YAML files can be complex.
+
+Helm simplifies the process by:
+
+✔ Packaging all Kubernetes resources into a single deployable unit
+✔ Managing application upgrades
+✔ Supporting version control and rollbacks
+✔ Simplifying installation of third-party applications
+
+Example rollback command:
+
+```bash
+helm rollback <release-name> <revision>
+```
+
+---
+
+# 🧩 Key Helm Concepts
+
+## 1️⃣ Helm Chart
+
+A **Helm Chart** is a package that contains Kubernetes manifests required to deploy an application.
+
+A chart typically includes:
+
+* Kubernetes YAML templates
+* Configuration values
+* Metadata about the application
+
+Charts are similar to **Linux packages (.rpm / .deb)**.
+
+Example:
+
+```bash
+helm install prometheus prometheus-community/prometheus
+```
+
+---
+
+## 2️⃣ Helm Repository
+
+A **Helm repository** stores Helm charts and makes them available for installation.
+
+Example repositories:
+
+* Prometheus charts
+* Grafana charts
+* Metrics Server charts
+
+Add a repository using:
+
+```bash
+helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server/
+```
+
+---
+
+## 3️⃣ Helm CLI
+
+Helm provides a command-line interface to manage applications in Kubernetes.
+
+| Command       | Purpose                 |
+| ------------- | ----------------------- |
+| helm install  | Install application     |
+| helm upgrade  | Upgrade application     |
+| helm rollback | Rollback application    |
+| helm list     | List installed releases |
+| helm delete   | Remove application      |
+
+---
+
+# 📂 Helm Chart Structure
+
+A Helm chart follows a specific directory structure.
+
+```
+my-chart
+├── Chart.yaml
+├── charts
+├── templates
+│   ├── deployment.yaml
+│   ├── service.yaml
+│   ├── ingress.yaml
+│   └── tests
+└── values.yaml
+```
+
+### Chart.yaml
+
+Contains metadata about the chart.
+
+Example:
+
+```yaml
+apiVersion: v2
+name: my-app
+version: 0.1.0
+```
+
+---
+
+### templates/
+
+Contains Kubernetes resource templates such as:
+
+* Deployments
+* Services
+* Ingress rules
+* ConfigMaps
+
+---
+
+### values.yaml
+
+Contains default configuration values used by templates.
+
+Example:
+
+```yaml
+replicaCount: 2
+
+image:
+  repository: nginx
+  tag: latest
+```
+
+Users can override values during installation.
+
+```
+helm install myapp ./chart -f custom-values.yaml
+```
+
+---
+
+### charts/
+
+Stores **dependent charts**.
+
+Example: Redis, MySQL dependency.
+
+---
+
+# ⚙️ Helm Installation
+
+### Step 1 — Download Helm Installation Script
+
+```bash
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+```
+
+### Step 2 — Give Execute Permission
+
+```bash
+chmod 700 get_helm.sh
+```
+
+### Step 3 — Install Helm
+
+```bash
+./get_helm.sh
+```
+
+### Step 4 — Verify Installation
+
+```bash
+helm
+```
+
+---
+
+# 📊 Installing Metrics Server Using Helm
+
+The **Metrics Server** collects resource usage data from Kubernetes nodes and pods.
+
+It enables the following commands:
+
+```
+kubectl top pods
+kubectl top nodes
+```
+
+---
+
+### Check existing Helm repositories
+
+```
+helm repo ls
+```
+
+---
+
+### Add Metrics Server Repository
+
+```
+helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server/
+```
+
+---
+
+### Install Metrics Server
+
+```
+helm upgrade --install metrics-server metrics-server/metrics-server
+```
+
+---
+
+### Verify Installation
+
+```
+helm list
+```
+
+Check metrics:
+
+```
+kubectl top pods
+kubectl top nodes
+```
+
+---
+
+### Delete Release
+
+```
+helm delete metrics-server
+```
+
+---
+
+# 📊 Kubernetes Monitoring
+
+Monitoring is essential for maintaining the health and performance of a Kubernetes cluster.
+
+Common monitoring tools used in Kubernetes:
+
+1. **Prometheus**
+2. **Grafana**
+
+These tools together provide a **complete monitoring solution**.
+
+---
+
+# 🔎 Prometheus
+
+**Prometheus** is an open-source monitoring and alerting toolkit.
+
+Features:
+
+* Collects metrics from Kubernetes components
+* Stores metrics as **time-series data**
+* Provides powerful query language (PromQL)
+* Supports alerting and monitoring
+
+Prometheus provides **built-in monitoring support for Kubernetes clusters**.
+
+---
+
+# 📈 Grafana
+
+**Grafana** is a monitoring and analytics platform used to visualize metrics.
+
+Features:
+
+* Interactive dashboards
+* Charts and graphs
+* Alerting capabilities
+* Multiple data source integrations
+
+Grafana connects to **Prometheus as a data source** and displays metrics in visual dashboards.
+
+---
+
+# ⚙️ Deploy Prometheus & Grafana Using Helm
+
+Helm makes it very easy to deploy monitoring tools in Kubernetes.
+
+---
+
+## Step 1 — Add Helm Repositories
+
+Add Helm stable repository:
+
+```
+helm repo add stable https://charts.helm.sh/stable
+```
+
+Add Prometheus repository:
+
+```
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+```
+
+---
+
+## Step 2 — Update Helm Repositories
+
+```
+helm repo update
+```
+
+---
+
+## Step 3 — Install Prometheus Stack
+
+```
+helm install stable prometheus-community/kube-prometheus-stack
+```
+
+This chart installs:
+
+* Prometheus
+* Grafana
+* AlertManager
+* Node Exporter
+* Kubernetes monitoring dashboards
+
+---
+
+## Step 4 — Verify Pods
+
+```
+kubectl get pods
+```
+
+You should see Prometheus and Grafana pods running.
+
+---
+
+## Step 5 — Check Services
+
+```
+kubectl get svc
+```
+
+By default services are created as **ClusterIP**, meaning they are accessible only inside the cluster.
+
+To access them externally, change the service type to **LoadBalancer**.
+
+---
+
+## Step 6 — Expose Prometheus
+
+Edit Prometheus service:
+
+```
+kubectl edit svc stable-kube-prometheus-sta-prometheus
+```
+
+Change:
+
+```
+type: ClusterIP
+```
+
+to
+
+```
+type: LoadBalancer
+```
+
+Save and exit.
+
+---
+
+## Step 7 — Expose Grafana
+
+```
+kubectl edit svc stable-grafana
+```
+
+Change service type to:
+
+```
+type: LoadBalancer
+```
+
+---
+
+## Step 8 — Verify Services
+
+```
+kubectl get svc
+```
+
+You should now see an **external LoadBalancer IP or DNS**.
+
+---
+
+# 🌐 Access Monitoring Tools
+
+### Prometheus
+
+```
+http://LBR-DNS:9090
+```
+
+---
+
+### Grafana
+
+```
+http://LBR-DNS
+```
+
+---
+
+# 🔑 Grafana Login Credentials
+
+Default login credentials:
+
+```
+Username: admin
+Password: prom-operator
+```
+
+After logging in, Grafana dashboards will show **Kubernetes cluster metrics, CPU usage, memory usage, and pod statistics in graphical form.**
+
+---
+
+# ⚠️ Metrics Server Issue Reference
+
+If metrics server shows errors like **Service Unavailable**, refer to:
+
+https://www.linuxsysadmins.com/service-unavailable-kubernetes-metrics/
+
+---
+
+# 🎯 Summary
+
+Helm simplifies Kubernetes deployments by packaging applications into reusable charts.
+
+Monitoring tools like **Prometheus and Grafana** provide real-time visibility into cluster performance.
+
+Together they provide:
+
+✔ Simplified Kubernetes application deployment
+✔ Easy installation of third-party applications
+✔ Cluster performance monitoring
+✔ Visual dashboards for metrics
+✔ Alerting and observability
+
+These tools are essential for **modern DevOps and Kubernetes operations**.
+
+---
+
+# 📚 Useful Helm Commands
+
+```
+helm repo ls
+helm repo add <repo-name> <repo-url>
+helm repo update
+helm install <release-name> <chart>
+helm upgrade <release-name> <chart>
+helm rollback <release-name> <revision>
+helm list
+helm delete <release-name>
+```
+---
