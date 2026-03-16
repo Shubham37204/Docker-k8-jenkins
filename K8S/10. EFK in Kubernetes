@@ -1,0 +1,385 @@
+## 📌 Overview
+
+In Kubernetes environments, applications run inside **containers across multiple nodes**, which makes log collection and debugging difficult.
+To solve this problem, organizations use **centralized logging systems**.
+
+The **EFK Stack** is a popular solution used in Kubernetes for centralized logging.
+
+EFK stands for:
+
+| Component         | Purpose                       |
+| ----------------- | ----------------------------- |
+| **Elasticsearch** | Stores logs                   |
+| **Fluent Bit**    | Collects logs from containers |
+| **Kibana**        | Visualizes and analyzes logs  |
+
+The log flow works like this:
+
+```
+Application Logs
+       ↓
+Fluent Bit (Log Collector)
+       ↓
+Elasticsearch (Log Storage)
+       ↓
+Kibana (Visualization Dashboard)
+```
+
+In this setup:
+
+* **Fluent Bit** collects logs from Kubernetes nodes
+* **Elasticsearch** stores logs in a searchable database
+* **Kibana** displays logs using dashboards and analytics tools
+
+---
+
+# 📦 Components of EFK Stack
+
+## 1️⃣ Elasticsearch
+
+**Elasticsearch** is a distributed search and analytics engine used to store logs.
+
+Features:
+
+* Stores log data
+* Provides fast search capabilities
+* Indexes logs for efficient querying
+* Handles large volumes of log data
+
+Logs are stored as **time-series data**, allowing users to filter logs by time, container, or error type.
+
+---
+
+## 2️⃣ Fluent Bit
+
+**Fluent Bit** is a lightweight log collector and forwarder.
+
+Responsibilities:
+
+* Collect logs from Kubernetes containers
+* Parse and process logs
+* Forward logs to Elasticsearch
+
+Fluent Bit typically runs as a **DaemonSet**, meaning one pod runs on every Kubernetes node to collect logs.
+
+---
+
+## 3️⃣ Kibana
+
+**Kibana** is a web-based data visualization tool.
+
+Features:
+
+* Displays logs stored in Elasticsearch
+* Creates dashboards and charts
+* Provides advanced log search
+* Enables real-time monitoring
+
+Kibana fetches data from Elasticsearch and presents it through a **user-friendly web interface**.
+
+---
+
+# 🎯 Why Use EFK in Kubernetes?
+
+Kubernetes logs are distributed across containers and nodes.
+
+Problems without centralized logging:
+
+* Logs disappear when pods restart
+* Logs are spread across multiple nodes
+* Difficult debugging
+
+EFK solves this by providing:
+
+✔ Centralized log storage
+✔ Real-time monitoring
+✔ Easy log search and filtering
+✔ Improved troubleshooting
+
+---
+
+# ⚙️ EFK Setup Using Helm
+
+The EFK stack can be deployed easily using **Helm charts**.
+
+We will install:
+
+1. Elasticsearch
+2. Fluent Bit
+3. Kibana
+
+---
+
+# 🗄 Step 1 — Create Storage Class
+
+Elasticsearch requires persistent storage.
+
+Create `storage-class.yml`
+
+```yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: dev-storage-class
+provisioner: kubernetes.io/hostpath
+```
+
+Apply the configuration:
+
+```bash
+kubectl apply -f storage-class.yml
+```
+
+Verify storage class:
+
+```bash
+kubectl get sc
+```
+
+---
+
+# 📂 Step 2 — Create Namespace
+
+Create a dedicated namespace for logging components.
+
+```bash
+kubectl create namespace logging
+```
+
+Verify namespace:
+
+```bash
+kubectl get ns
+```
+
+---
+
+# 💾 Step 3 — Create Persistent Volume
+
+Create `pv.yml`
+
+```yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: elasticsearch-master
+  namespace: logging
+spec:
+  capacity:
+    storage: 20Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: dev-storage-class
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /tmp
+```
+
+Apply PV:
+
+```bash
+kubectl apply -f pv.yml
+```
+
+Verify:
+
+```bash
+kubectl get pv -n logging
+```
+
+---
+
+# 🔎 Step 4 — Install Elasticsearch
+
+Download Elasticsearch Helm chart:
+
+```bash
+wget https://helm.elastic.co/helm/elasticsearch/elasticsearch-7.17.1.tgz
+```
+
+Extract the chart:
+
+```bash
+tar -xvf elasticsearch-7.17.1.tgz
+```
+
+Go inside directory:
+
+```bash
+cd elasticsearch
+```
+
+Edit `values.yaml` to include storage class:
+
+```yaml
+volumeClaimTemplate:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: dev-storage-class
+  resources:
+    requests:
+      storage: 5Gi
+```
+
+Install Elasticsearch:
+
+```bash
+helm install elasticsearch-repo . -f values.yaml -n logging
+```
+
+Verify:
+
+```bash
+kubectl get pods -n logging
+```
+
+---
+
+# 📡 Step 5 — Install Fluent Bit
+
+Download Fluent Bit Helm chart:
+
+```bash
+wget https://github.com/fluent/helm-charts/releases/download/fluent-bit-0.21.0/fluent-bit-0.21.0.tgz
+```
+
+Extract it:
+
+```bash
+tar -xvf fluent-bit-0.21.0.tgz
+```
+
+Go inside directory:
+
+```bash
+cd fluent-bit
+```
+
+Install Fluent Bit:
+
+```bash
+helm install fluent-bit . -f values.yaml -n logging
+```
+
+Fluent Bit will start collecting logs from Kubernetes nodes and forwarding them to Elasticsearch.
+
+---
+
+# 📊 Step 6 — Install Kibana
+
+Download Kibana Helm chart:
+
+```bash
+wget https://helm.elastic.co/helm/kibana/kibana-7.17.3.tgz
+```
+
+Extract it:
+
+```bash
+tar -xvf kibana-7.17.3.tgz
+```
+
+Go inside directory:
+
+```bash
+cd kibana
+```
+
+Edit `values.yaml`:
+
+Change service type from:
+
+```
+ClusterIP
+```
+
+to
+
+```
+NodePort
+```
+
+Example configuration:
+
+```yaml
+service:
+  type: NodePort
+  port: 5601
+  nodePort: 30002
+```
+
+Install Kibana:
+
+```bash
+helm install kibana . -f values.yaml -n logging
+```
+
+---
+
+# 🔍 Step 7 — Verify Deployment
+
+Check pods:
+
+```bash
+kubectl get pods -n logging
+```
+
+Check services:
+
+```bash
+kubectl get svc -n logging
+```
+
+---
+
+# 🌐 Step 8 — Access Kibana Dashboard
+
+Access Kibana using:
+
+```
+http://Node-Public-IP:30002
+```
+
+Kibana dashboard allows you to:
+
+* Search logs
+* Analyze logs
+* Monitor application activity
+* Create visualization dashboards
+
+---
+
+# 🏗 Final Architecture
+
+```
+Kubernetes Pods
+        ↓
+    Fluent Bit
+ (Log Collector)
+        ↓
+   Elasticsearch
+   (Log Storage)
+        ↓
+      Kibana
+(Log Visualization)
+```
+
+---
+
+# 🎯 Summary
+
+The **EFK stack** provides a complete centralized logging solution for Kubernetes.
+
+| Tool          | Role                     |
+| ------------- | ------------------------ |
+| Fluent Bit    | Collects logs from nodes |
+| Elasticsearch | Stores logs              |
+| Kibana        | Visualizes logs          |
+
+Benefits:
+
+✔ Centralized logging
+✔ Real-time log monitoring
+✔ Easy debugging and troubleshooting
+✔ Scalable logging architecture
+
+---
