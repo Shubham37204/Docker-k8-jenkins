@@ -1,0 +1,233 @@
+# 🔹 1. What is a StatefulSet?
+
+A **StatefulSet** is a Kubernetes resource used to manage **stateful applications**.
+
+Unlike Deployments, StatefulSets provide:
+
+* 🆔 **Stable Pod names** (e.g., `pod-0`, `pod-1`)
+* 🌐 **Stable network identity**
+* 💾 **Persistent storage per Pod**
+* 🔄 **Ordered deployment & scaling**
+
+---
+
+## 🔸 Key Features
+
+* Pods are created **in sequence** (`pod-0 → pod-1 → pod-2`)
+* Each Pod has **its own storage**
+* Pods are **not interchangeable**
+
+---
+
+## 🔸 Use Cases
+
+* 🗄️ Databases (MySQL, PostgreSQL, MongoDB)
+* 📦 Distributed systems (Kafka, Zookeeper)
+* 💾 Applications requiring persistent identity
+
+---
+
+## 🔸 Example StatefulSet YAML
+
+```yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nginx-statefulset
+spec:
+  serviceName: "nginx"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        volumeMounts:
+        - name: data
+          mountPath: /usr/share/nginx/html
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi
+```
+
+---
+
+## 🔹 How StatefulSet Works
+
+```text
+Create StatefulSet (3 replicas)
+        ↓
+Pod-0 created first
+        ↓
+Pod-1 created after Pod-0 is ready
+        ↓
+Pod-2 created after Pod-1 is ready
+        ↓
+Each Pod gets its own PVC
+```
+
+---
+
+# 🔹 2. Persistent Volume (PV)
+
+A **Persistent Volume (PV)** is a **storage resource in Kubernetes cluster**.
+
+👉 Think of PV as:
+
+> 💾 Actual storage (like disk, EBS, NFS)
+
+---
+
+## 🔸 Key Features
+
+* Created by **admin**
+* Exists **independent of Pods**
+* Can be reused
+
+---
+
+## 🔸 Example PV YAML
+
+```yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: my-pv
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data
+```
+
+---
+
+# 🔹 3. Persistent Volume Claim (PVC)
+
+A **Persistent Volume Claim (PVC)** is a **request for storage by a user (Pod)**.
+
+👉 Think of PVC as:
+
+> 📄 Request for storage (like asking for disk)
+
+---
+
+## 🔸 Key Features
+
+* Created by **developer**
+* Binds to a suitable PV
+* Used inside Pods
+
+---
+
+## 🔸 Example PVC YAML
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+```
+
+---
+
+# 🔹 4. Pod Using PVC
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    volumeMounts:
+    - mountPath: "/usr/share/nginx/html"
+      name: storage
+  volumes:
+  - name: storage
+    persistentVolumeClaim:
+      claimName: my-pvc
+```
+
+---
+
+# 🔹 How PV, PVC & Pod Work Together
+
+```text
+Admin creates PV (storage available)
+        ↓
+Developer creates PVC (request storage)
+        ↓
+Kubernetes binds PVC → PV
+        ↓
+Pod uses PVC
+        ↓
+Pod gets storage automatically
+```
+
+---
+
+# 🔹 Important Concepts
+
+| Concept     | Meaning                 |
+| ----------- | ----------------------- |
+| PV          | Actual storage          |
+| PVC         | Storage request         |
+| Binding     | PVC linked to PV        |
+| AccessModes | How storage is accessed |
+
+---
+
+## 🔸 Access Modes
+
+* **ReadWriteOnce (RWO)** → One node can read/write
+* **ReadOnlyMany (ROX)** → Many nodes read only
+* **ReadWriteMany (RWX)** → Many nodes read/write
+
+---
+
+# 🔹 StatefulSet + PVC Relation
+
+* Each Pod in StatefulSet gets **its own PVC**
+* PVCs are created using `volumeClaimTemplates`
+* Data is **not lost even if Pod restarts**
+
+---
+
+# 🚀 Final Summary
+
+| Resource    | Purpose                    |
+| ----------- | -------------------------- |
+| StatefulSet | Manage stateful apps       |
+| PV          | Actual storage             |
+| PVC         | Storage request            |
+| Pod         | Uses PVC to access storage |
+
+---
+
+## 🔥 Final Takeaway
+
+* Use **StatefulSet** for apps needing identity + storage
+* Use **PV + PVC** for persistent storage
+---
