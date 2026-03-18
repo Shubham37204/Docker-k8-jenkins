@@ -1,0 +1,101 @@
+## 🔹 What is a DaemonSet?
+
+A **DaemonSet** is a Kubernetes resource used to ensure that **a copy of a Pod runs on every node** (or selected nodes) in a cluster.
+
+Unlike Deployments (which run a specific number of replicas), a DaemonSet automatically ensures that **each worker node gets exactly one Pod instance**.
+
+---
+
+## 🔹 Key Concept
+
+* When a new node is added → Pod is automatically created on that node
+* When a node is removed → Pod is automatically deleted
+* Guarantees **one Pod per node**
+
+---
+
+## 🔹 Common Use Cases
+
+DaemonSets are mainly used for **system-level services**, such as:
+
+* 📦 Running a **storage daemon** on every node
+* 📊 Running a **monitoring agent** (e.g., Prometheus Node Exporter)
+* 📜 Running a **log collection service** (e.g., Fluentd)
+
+---
+
+## 🔹 Example: Fluentd DaemonSet
+
+Fluentd is commonly used to collect logs from all nodes and send them to Elasticsearch.
+
+### ✅ Step 1: Create DaemonSet
+
+```bash
+kubectl apply -f https://k8s.io/examples/controllers/daemonset.yaml
+```
+
+---
+
+### ✅ Step 2: Verify Resources in kube-system Namespace
+
+```bash
+kubectl get all -n kube-system
+```
+
+---
+
+### ✅ Step 3: Check Pods with Node Details
+
+```bash
+kubectl get pods -o wide -n kube-system
+```
+
+👉 This command shows:
+
+* Pod name
+* Node where it is running
+* IP address
+
+---
+
+## 🔹 How DaemonSet Works (Simple Flow)
+
+```
+Cluster with 3 Nodes
+        ↓
+DaemonSet Created
+        ↓
+Pod runs on Node1, Node2, Node3
+        ↓
+New Node Added → Pod Automatically Created
+        ↓
+Node Removed → Pod Automatically Deleted
+```
+
+---
+
+## 🔹 Important Points
+
+* Runs **1 Pod per node** (default behavior)
+* Used for **background/system services**
+* Pods are scheduled automatically by Kubernetes
+* Works best with **node-level operations**
+
+---
+
+## 🔹 Summary
+
+| Feature   | DaemonSet Behavior           |
+| --------- | ---------------------------- |
+| Pod Count | One per node                 |
+| Scaling   | Automatic with nodes         |
+| Use Case  | Logging, Monitoring, Storage |
+| Namespace | Often `kube-system`          |
+
+---
+
+## 🚀 Final Takeaway
+
+If your application needs to run **on every node**, always use a **DaemonSet** instead of Deployment.
+
+---
