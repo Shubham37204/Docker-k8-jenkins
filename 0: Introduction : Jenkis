@@ -1,0 +1,57 @@
+What is Jenkins?
+
+Jenkins is an open-source and free software developed using Java. It is widely used as a CI/CD server to automate the process of building and deploying applications.
+
+* **CI (Continuous Integration):** Automatically integrates code changes from multiple developers into a shared repository.
+* **CD (Continuous Delivery):** Automatically prepares code for deployment to production or testing environments.
+
+Using Jenkins, we can automate the build and deployment of different types of projects such as Java, Python, .NET, React, and Angular.
+
+---
+
+## What is Build & Deployment?
+
+Build and deployment is a process that includes the following steps:
+
+1. Take the latest source code from a GitHub repository.
+2. Build the source code using tools like Maven.
+3. Perform code quality checks using tools like SonarQube.
+4. Upload the generated artifact (JAR/WAR) into a repository like Nexus.
+5. Deploy the application to a server.
+
+---
+
+## Why Do We Need Jenkins?
+
+In real-world projects:
+
+* Developers commit code multiple times a day.
+* Each commit requires build and deployment.
+
+### Problem (Manual Process)
+
+* Time-consuming
+* Error-prone
+* Not scalable
+
+### Solution (Using Jenkins)
+
+Jenkins automates the entire build and deployment process, making it:
+
+* Fast
+* Reliable
+* Consistent
+
+---
+
+## Summary
+
+Jenkins helps automate CI/CD pipelines by:
+
+* Fetching code from GitHub
+* Building applications
+* Performing code analysis
+* Storing artifacts
+* Deploying applications automatically
+
+👉 This automation improves efficiency and reduces human errors in the software development lifecycle.
