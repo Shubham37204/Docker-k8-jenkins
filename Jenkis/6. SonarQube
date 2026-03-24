@@ -48,6 +48,42 @@ If Quality Gate is failed, we should NOT deploy the code.
 SonarQube provides a default quality gate.
 We can also create a custom quality gate.
 
+# SonarQube Server Setup
+
+Setup Guide:
+https://github.com/ashokitschool/DevOps-Documents/blob/main/06-Sonar-Setup-Docker.md
+
+Default Login Credentials:
+Username: admin  
+Password: admin  
+
+---
+
+# Integration with Maven Project
+
+Step 1: Generate Token  
+Go to Sonar Dashboard → My Account → Security → Generate Token  
+
+Step 2: Clone Project  
+https://github.com/ashokitschool/SB-REST-H2-DB-APP  
+
+Step 3: Update pom.xml  
+
+Add below inside <properties>:
+
+<properties>
+  <sonar.host.url>http://<your-ip>:9000/</sonar.host.url>
+  <sonar.login><your-token></sonar.login>
+</properties>
+
+Step 4: Run Command  
+
+mvn sonar:sonar  
+
+---
+
+
+
 ---
 
 # Conclusion
