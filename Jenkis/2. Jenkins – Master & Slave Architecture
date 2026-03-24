@@ -1,0 +1,316 @@
+# 🔹 Why Master & Slave Architecture?
+
+In real-world projects, multiple jobs run frequently (build, test, deploy).
+
+👉 If Jenkins runs on a **single machine**:
+
+* CPU and memory load increases
+* System becomes slow
+* High chance of crashes
+
+### ❌ Problem:
+
+Single Jenkins server = **Overloaded system**
+
+### ✅ Solution:
+
+Use **Master & Slave Architecture**
+
+👉 It distributes workload across multiple machines.
+
+---
+
+# 🔹 What is Master & Slave Architecture?
+
+It is a setup where:
+
+* One machine acts as **Master (controller)**
+* Multiple machines act as **Slaves (agents/workers)**
+
+👉 Master assigns tasks
+👉 Slaves execute tasks
+
+---
+
+# 🔹 Jenkins Master
+
+The machine where Jenkins is installed is called the **Master Node**.
+
+## Responsibilities:
+
+* Create Jenkins Jobs
+* Schedule Jobs
+* Manage pipelines
+* Distribute jobs to slaves
+* Monitor execution
+
+⚠️ Jobs can run on master but **NOT recommended**
+
+---
+
+# 🔹 Jenkins Slave (Agent)
+
+A slave is a machine connected to Jenkins master.
+
+## Responsibilities:
+
+* Execute jobs
+* Receive tasks from master
+* Return results
+
+---
+
+# 🔹 Architecture Flow
+
+```
+Developer → GitHub → Jenkins Master → Slave → Result
+```
+
+---
+
+# 🔹 Step-1 : Create Jenkins Master VM
+
+1. Launch EC2 (t2.medium)
+2. Install Java:
+
+```bash
+sudo apt update
+sudo apt install openjdk-11-jdk
+```
+
+3. Install Jenkins:
+
+```bash
+sudo apt install jenkins
+sudo systemctl start jenkins
+```
+
+---
+
+# 🔹 Step-2 : Create Jenkins Slave VM
+
+1. Launch EC2 (Ubuntu t2.micro)
+
+2. Connect via SSH
+
+3. Change hostname:
+
+```bash
+sudo hostname jenkins-slave
+exit
+```
+
+4. Install Java:
+
+```bash
+sudo apt update
+sudo apt install default-jre
+```
+
+5. Create directory:
+
+```bash
+mkdir -p /home/ubuntu/slavenode
+```
+
+---
+
+# 🔹 Step-3 : Configure Slave Node in Jenkins Master
+
+---
+
+## ✅ Step 3.1 – Open Node Section
+
+Go to:
+
+```
+Manage Jenkins → Nodes → New Node
+```
+
+---
+
+## ✅ Step 3.2 – Create Node
+
+* Name: `slave-1`
+* Select: `Permanent Agent`
+  👉 Click **Create**
+
+---
+
+## ✅ Step 3.3 – Fill Configuration
+
+### 📁 Remote Root Directory
+
+```
+/home/ubuntu/slavenode
+```
+
+---
+
+### 🏷 Label
+
+```
+slave-1
+```
+
+---
+
+### ⚙️ Usage
+
+```
+Use this node as much as possible
+```
+
+---
+
+### 🚀 Launch Method
+
+```
+Launch agents via SSH
+```
+
+---
+
+### 🌐 Host
+
+👉 Paste Slave EC2 Public DNS
+
+---
+
+## 🔐 Step 3.4 – Add Credentials
+
+Click:
+
+```
+Add → Jenkins
+```
+
+Fill:
+
+* Kind: `SSH Username with private key`
+* Username: `ubuntu`
+
+---
+
+### 🔑 Private Key
+
+Select:
+
+```
+Enter directly
+```
+
+👉 Open `.pem` file → Copy full content → Paste in Jenkins
+
+---
+
+Click **Add**
+
+---
+
+## 🔐 Step 3.5 – Host Key Strategy
+
+Select:
+
+```
+Manually trusted key verification strategy
+```
+
+---
+
+## ✅ Step 3.6 – Save
+
+Click:
+
+```
+Apply → Save
+```
+
+---
+
+## 🔍 Step 3.7 – Verify Node
+
+Go to:
+
+```
+Manage Jenkins → Nodes → slave-1
+```
+
+✔ Status should be:
+
+```
+Agent is online
+```
+
+---
+
+## ❌ Common Errors & Fix
+
+### Permission Denied
+
+* Check `.pem` key
+* Username must be `ubuntu`
+
+### Connection Timeout
+
+* Open port **22 (SSH)** in Security Group
+* Verify Public DNS
+
+### Directory Missing
+
+```bash
+mkdir -p /home/ubuntu/slavenode
+```
+
+---
+
+# 🔹 Run Job on Slave
+
+1. Create Job
+2. Enable:
+
+```
+Restrict where this project can run
+```
+
+3. Enter:
+
+```
+slave-1
+```
+
+4. Click **Build Now**
+
+👉 Job runs on Slave
+
+---
+
+# 🔹 Advantages
+
+* Load distribution
+* Faster builds
+* Parallel execution
+* Scalable
+* Stable system
+
+---
+
+# 🔹 Real-World Example
+
+Without slaves:
+
+* Multiple builds → system crash ❌
+
+With slaves:
+
+* Jobs distributed → smooth execution ✅
+
+---
+
+# 🔹 Summary
+
+| Component | Role                 |
+| --------- | -------------------- |
+| Master    | Controls & schedules |
+| Slave     | Executes jobs        |
+| Goal      | Distribute load      |
