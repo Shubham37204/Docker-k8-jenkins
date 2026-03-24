@@ -1,0 +1,271 @@
+# 🔹 What is Jenkins Pipeline?
+
+Jenkins Pipeline is a way to define the **entire CI/CD process as code**.
+
+👉 Instead of configuring jobs manually in UI, we write everything in a file (Pipeline script).
+
+---
+
+## ✅ Why Pipeline?
+
+* Handles **complex CI/CD workflows**
+* Version controlled (stored in Git)
+* Easy to maintain & modify
+* Reusable and scalable
+
+---
+
+# 🔹 Pipeline Workflow (Real-World Stages)
+
+A pipeline consists of multiple stages:
+
+1. Clone Git Repository
+2. Build using Maven
+3. Code Review (SonarQube)
+4. Upload Artifact (Nexus)
+5. Build Docker Image
+6. Push Image to Registry
+7. Deploy to Kubernetes
+8. Send Notification
+
+👉 Each step is called a **Stage**
+
+---
+
+# 🔹 Types of Jenkins Pipelines
+
+### 1️⃣ Declarative Pipeline (Recommended ✅)
+
+* Simple syntax
+* Easy to understand
+* Structured format
+
+### 2️⃣ Scripted Pipeline
+
+* Written in Groovy
+* More flexible but complex
+
+---
+
+# 🔹 Basic Declarative Pipeline Example
+
+```groovy
+pipeline {
+    agent any
+
+    tools {
+        maven "maven-3.9"
+    }
+
+    stages {
+        stage('Git Clone') {
+            steps {
+                echo 'cloning git repo'
+            }
+        }
+        stage('Maven Build') {
+            steps {
+                echo 'Maven Build'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo 'Tomcat Deployment'
+            }
+        }
+    }
+}
+```
+
+---
+
+# 🔹 Declarative Pipeline (Git + Maven)
+
+```groovy
+pipeline {
+    agent any
+    
+    tools {
+        maven "maven-3.9.8"
+    }
+
+    stages {
+        stage('Git Clone') {
+            steps {
+                git branch: 'develop', 
+                    url: 'https://github.com/ashokitschool/maven-web-app.git'
+            }
+        }
+
+        stage('Maven Build') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+    }
+}
+```
+
+---
+
+# 🔹 SSH Agent Configuration (VERY IMPORTANT 🔥)
+
+## What is SSH Agent?
+
+SSH Agent is used to:
+👉 Connect Jenkins server → Remote server (like Tomcat)
+
+Example:
+
+* Jenkins → Tomcat server
+* Copy `.war` file using SSH
+
+---
+
+## ✅ Step 1: Install Plugin
+
+Go to:
+
+```
+Manage Jenkins → Plugins → Available
+```
+
+Search:
+
+```
+SSH Agent Plugin
+```
+
+Install it ✅
+
+---
+
+## ✅ Step 2: Add Credentials
+
+* Go to:
+
+```
+Manage Jenkins → Credentials
+```
+
+* Add:
+
+```
+SSH Username with private key
+```
+
+* Enter:
+
+  * Username: `ec2-user` (or ubuntu)
+  * Paste `.pem` file content
+
+---
+
+## ✅ Step 3: Generate SSH Agent Code
+
+Go to:
+
+```
+Pipeline Syntax → Snippet Generator
+```
+
+* Select:
+
+```
+SSH Agent
+```
+
+* Choose credentials
+* Generate script
+
+---
+
+## 🔹 Example SSH Agent Usage
+
+```groovy
+sshagent(['tomcat-server-credentials']) {
+    sh 'scp -o StrictHostKeyChecking=no target/app.war ec2-user@public-ip:/path'
+}
+```
+
+---
+
+# 🔹 Copy WAR File to Tomcat
+
+```bash
+scp -o StrictHostKeyChecking=no target/01-maven-web-app.war ec2-user@public-ip:/home/ec2-user/apache-tomcat-9.0.91/webapps
+```
+
+👉 This deploys application into Tomcat server
+
+---
+
+# 🔹 Complete Pipeline (Git + Maven + Tomcat)
+
+```groovy
+pipeline {
+    agent any
+    
+    tools {
+        maven "maven-3.9.8"
+    }
+
+    stages {
+
+        stage('Git Clone') {
+            steps {
+                git branch: 'develop', 
+                    url: 'https://github.com/ashokitschool/maven-web-app.git'
+            }
+        }
+
+        stage('Maven Build') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+
+        stage('Deployment') {
+            steps {
+                sshagent(['tomcat-server-credentials']) {
+                    sh '''
+                    scp -o StrictHostKeyChecking=no \
+                    target/01-maven-web-app.war \
+                    ec2-user@public-ip:/home/ec2-user/apache-tomcat-9.0.91/webapps
+                    '''
+                }
+            }
+        }
+    }
+}
+```
+
+---
+
+# 🔹 Key Concepts to Remember
+
+✔ Pipeline = CI/CD as Code
+✔ Stages = Steps in workflow
+✔ Declarative = Easy & recommended
+✔ SSH Agent = Secure remote deployment
+✔ Everything is automated
+
+---
+
+# 🔹 Real-World Flow
+
+```
+Developer → GitHub → Jenkins Pipeline → Build → Deploy → App Live
+```
+
+---
+
+# 🔹 Summary
+
+| Feature   | Description               |
+| --------- | ------------------------- |
+| Pipeline  | Automates CI/CD           |
+| Stages    | Steps like build, deploy  |
+| Tools     | Maven, Git, Docker        |
+| SSH Agent | Connect remote servers    |
+| Benefit   | Fast, reliable automation |
