@@ -1,0 +1,56 @@
+SonarQube is a code quality checking tool used in DevOps.
+It is developed using Java and supports more than 30 programming languages.
+We use SonarQube to review code and find mistakes in the project.
+It generates a code review report which is shared with the development team.
+Code review is part of the build process.
+DevOps team runs SonarQube analysis.
+Development team fixes the issues found in the report.
+
+---
+
+# Types of Issues in SonarQube
+
+SonarQube detects the following issues:
+
+- Bugs → These are dangerous and can break the application
+- Vulnerabilities → These are security issues in the code
+- Code Smells → These are bad coding practices (not critical but should be improved)
+- Duplicate Code → Same code written multiple times
+- Code Coverage → Shows how much code is tested
+
+---
+
+# Quality Profile
+
+Quality Profile is a set of rules used to check code quality.
+Each programming language has its own quality profile.
+
+Examples:
+- Java Project → Java Quality Profile
+- Python Project → Python Quality Profile
+- PHP Project → PHP Quality Profile
+
+We can create our own custom quality profile.
+We can also set a profile as default for all projects.
+We can assign a specific profile to a specific project.
+
+Example:
+Name: SBI_Project_QP  
+Language: Java  
+Parent: None  
+
+---
+
+# Quality Gate
+
+Quality Gate tells whether the project code quality is passed or failed.
+If Quality Gate is failed, we should NOT deploy the code.
+SonarQube provides a default quality gate.
+We can also create a custom quality gate.
+
+---
+
+# Conclusion
+SonarQube helps improve code quality and security.
+Code should not be deployed if Quality Gate fails.
+It is an important part of CI/CD pipeline.
