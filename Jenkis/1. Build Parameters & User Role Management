@@ -1,0 +1,157 @@
+# 🔹 How to Create Jenkins Jobs with Build Parameters
+
+## What are Build Parameters?
+
+Build Parameters are used to pass dynamic inputs while running a Jenkins job.
+
+👉 This helps avoid hardcoding values in job configuration.
+
+### Example:
+
+Instead of fixing a branch name in the job, we can pass it at runtime.
+
+---
+
+## Steps to Configure Build Parameters
+
+1. Open your Jenkins Job
+2. Go to **General Section**
+3. Enable ✅ **"This project is parameterized"**
+4. Click **Add Parameter → Choice Parameter**
+
+### Configure Parameter:
+
+* **Name:** `branch`
+* **Choices:**
+
+  ```
+  master
+  develop
+  ```
+
+---
+
+## Use Parameter in Git Configuration
+
+In **Source Code Management → Branches to build**, use:
+
+```
+*/${branch}
+```
+
+👉 Now while running the job, Jenkins will ask for branch name dynamically.
+
+---
+
+## Benefits of Build Parameters
+
+* No hardcoding
+* Flexible job execution
+* Supports multiple environments (dev, prod, etc.)
+* Easy to reuse jobs
+
+---
+
+# 🔹 User & Roles Management in Jenkins
+
+## Project Team Structure Example
+
+* 👨‍💻 Development Team (10 members)
+* 🧪 Testing Team (5 members)
+* ⚙️ DevOps Team (3 members)
+
+---
+
+## Why User Management?
+
+* Each user gets individual login access
+* Access control improves security
+* Different teams have different responsibilities
+
+### Responsibilities:
+
+* **DevOps Team:** Create / Edit / Delete / Run Jobs
+* **Developers & Testers:** Only Run Jobs
+
+---
+
+# 🔹 How to Create Users in Jenkins
+
+1. Go to **Jenkins Dashboard**
+2. Click **Manage Jenkins**
+3. Select **Manage Users**
+4. Click **Create User**
+5. Fill details and save
+
+---
+
+# 🔹 How to Manage Permissions (Roles)
+
+## Step 1: Install Plugin
+
+Install:
+👉 **Role-Based Authorization Strategy Plugin**
+
+---
+
+## Step 2: Configure Security
+
+1. Go to **Manage Jenkins**
+2. Click **Configure Global Security**
+3. Under Authorization, select:
+
+   ```
+   Role-Based Strategy
+   ```
+4. Click **Save**
+
+---
+
+## Step 3: Create Roles
+
+1. Go to **Manage Jenkins**
+2. Click **Manage and Assign Roles**
+3. Click **Manage Roles**
+
+### Create Roles like:
+
+* `admin`
+* `developer`
+* `tester`
+
+👉 Assign permissions based on role:
+
+* Admin → Full access
+* Developer → Read + Build
+* Tester → Read + Build
+
+---
+
+## Step 4: Assign Roles to Users
+
+1. Go to **Manage Jenkins**
+2. Click **Assign Roles**
+3. Add users to roles
+
+---
+
+## Step 5: Test User Access
+
+* Login with different users
+* Verify permissions based on roles
+
+---
+
+# 🔹 Summary
+
+### Build Parameters
+
+* Allow dynamic inputs (like branch name)
+* Avoid hardcoding
+* Improve flexibility
+
+### User & Role Management
+
+* Secure Jenkins access
+* Control permissions
+* Separate responsibilities among teams
