@@ -1,0 +1,66 @@
+# 🔹 What is Scripted Pipeline?
+
+Jenkins Scripted Pipeline is a way to define CI/CD using **Groovy programming language**.
+
+👉 It provides **full control and flexibility** over pipeline logic.
+
+---
+
+# 🔹 Key Features
+
+### ✅ Flexibility
+
+* You can write custom logic (if-else, loops)
+
+### ✅ Customization
+
+* Full control over pipeline flow
+
+### ✅ Reusability
+
+* Functions and reusable blocks can be created
+
+---
+
+# 🔹 When to Use Scripted Pipeline?
+
+Use it when:
+
+* You need **complex logic**
+* Dynamic conditions are required
+* Declarative pipeline is not sufficient
+
+---
+
+# 🔹 Basic Syntax
+
+```
+node {
+
+    stage('clone') {
+        echo 'cloning...'
+    }
+
+    stage('build') {
+        echo 'build...'
+    }
+}
+```
+
+---
+
+## 🔹 Explanation
+
+* `node {}` → Defines execution environment (agent)
+* `stage {}` → Logical step in pipeline
+* `echo` → Print message in console
+
+---
+
+# 🔹 Scripted vs Declarative Pipeline
+
+| Feature     | Declarative        | Scripted          |
+| ----------- | ------------------ | ----------------- |
+| Syntax      | Simple             | Complex           |
+| Flexibility | Limited            | High              |
+| Use Case    | Standard pipelines | Complex pipelines |
