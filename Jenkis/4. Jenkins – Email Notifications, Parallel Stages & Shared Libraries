@@ -1,0 +1,321 @@
+# 🔹 Email Notifications in Jenkins
+
+## What is Email Notification?
+
+Jenkins can send email alerts to team members after job execution.
+
+👉 Useful for:
+
+* Build success notification ✅
+* Build failure alert ❌
+* Sharing logs with team
+
+---
+
+## 🔹 Why Important?
+
+* Keeps team informed automatically
+* Faster debugging
+* Improves collaboration
+
+---
+
+# 🔹 Configure Email (SMTP Setup)
+
+Follow steps:
+
+1. Go to:
+
+```
+Manage Jenkins → System
+```
+
+2. Scroll to:
+
+```
+Extended E-mail Notification
+```
+
+---
+
+## 🔧 Gmail SMTP Configuration (For Practice)
+
+* **SMTP Server:**
+
+  ```
+  smtp.gmail.com
+  ```
+
+* **Port:**
+
+  ```
+  587
+  ```
+
+---
+
+## 🔐 Authentication Setup
+
+In **Advanced Section**:
+
+* Add Gmail Username
+* Add **App Password** (NOT normal password)
+
+👉 Generate App Password:
+https://myaccount.google.com/apppasswords
+
+---
+
+## ✅ Enable Security
+
+✔ Select:
+
+```
+Use TLS
+```
+
+---
+
+## 🧪 Test Email
+
+At bottom:
+
+```
+Test configuration by sending test e-mail
+```
+
+---
+
+# 🔹 Pipeline with Email Notification
+
+```
+pipeline {
+    agent any
+    
+    tools {
+        maven "Maven-3.9.4"
+    }
+
+    stages {
+        stage('Clone') {
+            steps {
+                git 'https://github.com/ashokitschool/maven-web-app.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+    }
+
+    post {
+        failure {
+            emailext(
+                subject: "Build Failed: ${currentBuild.fullDisplayName}",
+                body: "Build failed. Check console output.",
+                to: 'team@gmail.com',
+                from: 'jenkins@gmail.com',
+                attachLog: true
+            )
+        }
+
+        success {
+            emailext(
+                subject: "Build Successful: ${currentBuild.fullDisplayName}",
+                body: "Build completed successfully.",
+                to: 'team@gmail.com',
+                from: 'jenkins@gmail.com',
+                attachLog: true
+            )
+        }
+    }
+}
+```
+
+---
+
+## 🔹 Key Concept
+
+👉 `post` block runs AFTER pipeline execution
+
+| Condition | Meaning         |
+| --------- | --------------- |
+| success   | If build passed |
+| failure   | If build failed |
+
+---
+
+# 🔹 Jenkins Parallel Stages
+
+## What is Parallel Execution?
+
+👉 Running multiple stages at the same time instead of sequentially
+
+---
+
+## 🔥 Why Use Parallel?
+
+* Saves time ⏱️
+* Improves performance
+* Faster CI/CD
+
+---
+
+## 🔹 Example Pipeline
+
+```
+pipeline {
+    agent any
+
+    stages {
+        stage('Git Clone') {
+            steps {
+                echo 'git clone...'
+            }
+        }
+
+        stage('Maven Build') {
+            steps {
+                echo 'maven build...'
+            }
+        }
+
+        stage('Parallel Stage') {
+            parallel {
+                stage('Code Review') {
+                    steps {
+                        echo 'code review...'
+                    }
+                }
+
+                stage('Nexus Upload') {
+                    steps {
+                        echo 'nexus upload...'
+                    }
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'deployment...'
+            }
+        }
+    }
+}
+```
+
+---
+
+## 🔹 Execution Flow
+
+```
+Step 1 → Step 2 → [Parallel Execution] → Final Step
+```
+
+👉 Code Review & Nexus Upload run together
+
+---
+
+# 🔹 Shared Libraries in Jenkins
+
+## What is Shared Library?
+
+👉 A reusable code module for Jenkins pipelines
+
+---
+
+## 🔥 Problem Without Shared Library
+
+* Same code repeated in multiple pipelines
+* Hard to maintain
+* Error-prone
+
+---
+
+## ✅ Solution
+
+Use **Shared Libraries**
+
+👉 Write common logic once → reuse everywhere
+
+---
+
+## 🔹 Example Use Cases
+
+* Maven build logic
+* Git clone steps
+* Code quality checks
+* Deployment scripts
+
+---
+
+## 🔹 How It Works
+
+1. Write Groovy scripts
+2. Store in Git repository
+3. Load in Jenkins pipeline
+
+---
+
+## 🔗 Example Git Repo
+
+```
+https://github.com/ashokitschool/my_shared_libraries.git
+```
+
+---
+
+# 🔹 Pipeline Using Shared Library
+
+```
+@Library('ashokit_shared_lib') _
+
+pipeline {
+    agent any
+    
+    tools {
+        maven "maven-3.9.8"
+    }
+
+    stages {
+        stage('Hello') {
+            steps {
+                welcome()
+            }
+        }
+
+        stage('Git Clone') {
+            steps {
+                gitClone()
+            }
+        }
+
+        stage('Maven Build') {
+            steps {
+                mavenBuild()
+            }
+        }
+    }
+}
+```
+
+---
+
+# 🔹 Key Concepts
+
+| Concept            | Meaning                  |
+| ------------------ | ------------------------ |
+| Email Notification | Alerts team after build  |
+| Parallel Stages    | Run tasks simultaneously |
+| Shared Library     | Reusable pipeline code   |
+
+---
+
+# 🔹 Summary
+
+✔ Email → Keeps team updated
+✔ Parallel → Faster execution
+✔ Shared Library → Clean & reusable code
