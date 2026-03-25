@@ -1,0 +1,220 @@
+## Overview
+
+Nexus is an open-source software used as an artifact repository.
+It is used to store and retrieve project build artifacts like JAR, WAR, and Docker images.
+It is developed using Java and the current version is 3.x.
+Artifacts are stored in Nexus for backup and reuse in projects.
+
+---
+
+## Why Nexus is Used
+
+- To store build artifacts safely
+- To share artifacts across teams
+- To manage versions of builds
+- To use in CI/CD pipelines
+
+---
+
+## Nexus vs GitHub
+
+GitHub:
+- Stores source code
+- Used for version control
+
+Nexus:
+- Stores build artifacts (jar/war)
+- Used as artifact repository
+
+---
+
+## When to Store Artifacts in Nexus
+
+Artifacts should be stored:
+- After build
+- Before deployment
+
+---
+
+## Types of Repositories
+
+### Snapshot Repository
+- Used for development versions
+- Example:
+  <version>0.0.1-SNAPSHOT</version>
+
+### Release Repository
+- Used for production versions
+- Example:
+  <version>RELEASE-1.0</version>
+
+---
+
+## Nexus Setup
+
+Setup Guide:
+https://github.com/ashokitschool/DevOps-Documents/blob/main/07-Nexus-Setup-Docker.md
+
+---
+
+## Creating Repositories
+
+- Go to Nexus UI
+- Click on Repositories
+- Create repository → Maven 2 (Hosted)
+- Select policy (snapshot or release)
+
+Example URLs:
+- Snapshot Repo:
+  http://<ip>:8081/repository/snapshot_repo/
+
+- Release Repo:
+  http://<ip>:8081/repository/release_repo/
+
+---
+
+## Integrate Maven with Nexus
+
+### Step 1: Clone Project
+https://github.com/ashokitschool/SB-REST-H2-DB-APP
+
+---
+
+### Step 2: Update pom.xml
+
+Add below:
+
+<distributionManagement> 
+  <repository>
+    <id>nexus</id>
+    <name>Release Repo</name>
+    <url>http://<ip>:8081/repository/release_repo/</url>
+  </repository>
+
+  <snapshotRepository>
+    <id>nexus</id>
+    <name>Snapshot Repo</name>
+    <url>http://<ip>:8081/repository/snapshot_repo/</url>
+  </snapshotRepository>  
+</distributionManagement>
+
+---
+
+### Step 3: Configure settings.xml
+
+Path:
+C:\apache-maven-3.x\conf\settings.xml
+
+Add:
+
+<servers>
+  <server>
+    <id>nexus</id>
+    <username>admin</username>
+    <password>admin@123</password>
+  </server>
+</servers>
+
+---
+
+### Step 4: Deploy Artifact
+
+Run:
+
+mvn clean deploy
+
+This will run:
+- compile
+- test
+- package
+- install
+- deploy
+
+---
+
+## Remote Repository (Shared Libraries)
+
+Remote repository is used to store common JAR files used in multiple projects.
+
+---
+
+### Create Remote Repository
+
+- Go to Nexus → Repositories
+- Create → Maven (Hosted)
+- Give name (example: remote-repo)
+
+---
+
+### Upload JAR
+
+Provide:
+- groupId
+- artifactId
+- version
+
+Example:
+groupId: in.ashokit  
+artifactId: pwd-utils  
+version: RELEASE-1.0  
+
+---
+
+### Add Dependency in pom.xml
+
+<dependency>
+  <groupId>in.ashokit</groupId>
+  <artifactId>pwd-utils</artifactId>
+  <version>RELEASE-1.0</version>
+</dependency>
+
+---
+
+### Add Repository in pom.xml
+
+<repositories>
+  <repository>
+    <id>nexus</id>
+    <url>http://<ip>:8081/repository/remote-repo/</url>
+  </repository>
+</repositories>
+
+---
+
+### Run Build
+
+mvn clean package
+
+---
+
+## Fix HTTP Block Issue
+
+Update settings.xml:
+
+<mirror>
+  <id>maven-default-http-blocker</id>
+  <mirrorOf>dummy</mirrorOf>
+  <url>http://0.0.0.0/</url>
+  <blocked>false</blocked>
+</mirror>
+
+---
+
+## Responsibilities
+
+DevOps Team:
+- Setup Nexus
+- Create repositories
+- Integrate with CI/CD
+
+Developers:
+- Use dependencies from Nexus
+- Maintain proper versions
+
+---
+
+## Conclusion
+
+Nexus is used to store and manage build artifacts.
+Artifacts should be stored after build and before deployment.
+It is an important tool in DevOps and CI/CD pipelines.
